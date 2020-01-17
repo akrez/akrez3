@@ -1,7 +1,9 @@
-/config/params.php
-/web/assets
 /web/robots.txt
 /vendor
-/runtime/*
 /gallery
 /config
+
+/runtime/*
+!/runtime/.gitkeep
+/web/assets/*
+!/web/assets/.gitkeep
