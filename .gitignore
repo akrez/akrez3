@@ -2,6 +2,6 @@
 /web/assets
 /web/robots.txt
 /vendor
-/runtime
+/runtime/*
 /gallery
 /config
