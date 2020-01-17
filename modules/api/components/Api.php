@@ -2,19 +2,19 @@
 
 namespace app\modules\api\components;
 
-use common\components\Helper;
-use common\components\SingleSort;
-use common\models\Basket;
-use common\models\Category;
-use common\models\Field;
-use common\models\FieldList;
-use common\models\FieldNumber;
-use common\models\FieldString;
-use common\models\Gallery;
-use common\models\Invoice;
-use common\models\Package;
-use common\models\Product;
-use common\models\Status;
+use app\components\Helper;
+use app\components\SingleSort;
+use app\models\Basket;
+use app\models\Category;
+use app\models\Field;
+use app\models\FieldList;
+use app\models\FieldNumber;
+use app\models\FieldString;
+use app\models\Gallery;
+use app\models\Invoice;
+use app\models\Package;
+use app\models\Product;
+use app\models\Status;
 use Yii;
 use yii\base\Component;
 use yii\base\DynamicModel;
@@ -25,6 +25,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\db\Exception;
+
 
 class Api extends Component
 {
@@ -74,7 +76,7 @@ class Api extends Component
 
     public static function url($controller, $action = null, $config = [])
     {
-        if (\Yii::$app->params['isParked']) {
+        if (Yii::$app->params['isParked']) {
             return Url::to([0 => $controller . '/' . $action] + $config);
         } else {
             return Url::to([0 => $controller . '/' . $action, '_blog' => Yii::$app->request->get('_blog')] + $config);
@@ -128,10 +130,10 @@ class Api extends Component
         $sort = Yii::$app->request->get('sort');
 
         $sortAttributes = [
-            '-created_at' => \Yii::t('app', 'Newest'),
-            'created_at' => \Yii::t('app', 'Oldest'),
-            '-title' => \Yii::t('app', 'Title (Desc)'),
-            'title' => \Yii::t('app', 'Title (Asc)'),
+            '-created_at' => Yii::t('app', 'Newest'),
+            'created_at' => Yii::t('app', 'Oldest'),
+            '-title' => Yii::t('app', 'Title (Desc)'),
+            'title' => Yii::t('app', 'Title (Asc)'),
         ];
 
         $blogName = self::blogAttribute('name');
