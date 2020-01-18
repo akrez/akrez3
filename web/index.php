@@ -84,7 +84,6 @@ $config = [
                 '<controller:(site)>/<action>' => '<controller>/<action>',
                 '<controller:(site)>' => '<controller>/index',
                 //
-                '<module:(api)>/<controller>/<action>/<id:\d+>' => '<module>/<controller>/<action>',
                 '<module:(api)>/<controller>/<action>' => '<module>/<controller>/<action>',
                 //
                 '<controller>/<_blog>/<action>/<id:\d+>' => '<controller>/<action>',

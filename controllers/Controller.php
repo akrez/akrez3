@@ -3,22 +3,15 @@
 namespace app\controllers;
 
 use app\models\Blog;
-use app\models\Status;
 use Yii;
 use yii\helpers\Url;
 use yii\web\Controller as BaseController;
 use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
 
 class Controller extends BaseController
 {
 
     public $wizard = null;
-    public $successful = null;
-    public $newModel = null;
-    public $searchModel = null;
-    public $parentModel = null;
-    public $parentSearchModel = null;
 
     public function behaviors()
     {
