@@ -3,7 +3,6 @@
 namespace app\modules\api\controllers;
 
 use app\components\SingleSort;
-use app\controllers\Controller as BaseController;
 use app\models\Category;
 use app\models\Field;
 use app\models\FieldList;
@@ -21,7 +20,7 @@ use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
-class V1Controller extends BaseController
+class V1Controller extends Controller
 {
 
     private static $_blog = false;
@@ -63,9 +62,10 @@ class V1Controller extends BaseController
     {
         return [
             'authenticator' => [
-                'class' => 'yii\filters\auth\HttpBearerAuth',
+                'class' => 'yii\filters\auth\QueryParamAuth',
                 'user' => Yii::$app->customerApi,
                 'optional' => ['*'],
+                'tokenParam' => '_token',
             ],
             'access' => [
                 'class' => 'yii\filters\AccessControl',
@@ -77,7 +77,7 @@ class V1Controller extends BaseController
                     [
                         'actions' => ['search', 'product',],
                         'allow' => true,
-                        'verbs' => ['GET'],
+                        'verbs' => ['POST'],
                         'roles' => ['?', '@'],
                     ],
                 ],
@@ -102,11 +102,10 @@ class V1Controller extends BaseController
 
     public function actionSearch()
     {
-        ////
-        $searchParams = Yii::$app->request->get('Search', []);
-        $page = Yii::$app->request->get('page');
-        $sort = Yii::$app->request->get('sort');
-        $categoryId = Yii::$app->request->get('categoryId');
+        $searchParams = Yii::$app->request->post('Search', []);
+        $page = Yii::$app->request->post('page');
+        $sort = Yii::$app->request->post('sort');
+        $categoryId = Yii::$app->request->post('categoryId');
         //
         $blog = Yii::$app->blog->getIdentity();
         //
