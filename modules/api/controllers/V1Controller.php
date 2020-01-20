@@ -100,12 +100,11 @@ class V1Controller extends Controller
         return ArrayHelper::toArray($models);
     }
 
-    public function actionSearch()
+    public function actionSearch($categoryId = null)
     {
         $searchParams = Yii::$app->request->post('Search', []);
         $page = Yii::$app->request->post('page');
         $sort = Yii::$app->request->post('sort');
-        $categoryId = Yii::$app->request->post('categoryId');
         //
         $blog = Yii::$app->blog->getIdentity();
         //

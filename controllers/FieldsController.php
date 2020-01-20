@@ -13,6 +13,7 @@ use app\models\FieldString;
 use app\models\Product;
 use Yii;
 use yii\web\NotFoundHttpException;
+use app\components\WizardController;
 
 class FieldsController extends Controller
 {
@@ -20,8 +21,10 @@ class FieldsController extends Controller
     public function init()
     {
         parent::init();
-        $this->parentModel = new Product();
-        $this->parentSearchModel = new ProductSearch();
+        $this->wizard = new WizardController([
+            'parentModel' => new Product(),
+            'parentSearchModel' => new ProductSearch(),
+        ]);
     }
 
     public function behaviors()
@@ -85,7 +88,7 @@ class FieldsController extends Controller
 
     public function update($categoryFields, $instanceModel, $instanceSearchModel)
     {
-        $models = $instanceSearchModel->userValidQuery()->andWhere(['product_id' => $this->parentModel->id])->orderBy('field_id')->indexBy('id')->all();
+        $models = $instanceSearchModel->userValidQuery()->andWhere(['product_id' => $this->wizard->parentModel->id])->orderBy('field_id')->indexBy('id')->all();
         foreach ($models as $id => $model) {
             $model->field = isset($categoryFields[$model->field_id]) ? $categoryFields[$model->field_id] : null;
         }
@@ -205,9 +208,9 @@ class FieldsController extends Controller
 
     public function findParentModel($id)
     {
-        $this->parentModel = $this->parentSearchModel->userValidQuery($id)->one();
-        if ($this->parentModel) {
-            return $this->parentModel;
+        $this->wizard->parentModel = $this->wizard->parentSearchModel->userValidQuery($id)->one();
+        if ($this->wizard->parentModel) {
+            return $this->wizard->parentModel;
         }
         throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
     }
