@@ -26,6 +26,7 @@ namespace app\models;
 class Blog extends ActiveRecord
 {
 
+    public $apiConstantId = '91b200dd185f91541331056aa33363b4';
     public $image;
 
     public static function tableName()
@@ -48,7 +49,7 @@ class Blog extends ActiveRecord
             [['status'], 'in', 'range' => Status::getDefaultKeys()],
             [['!name'], 'string', 'max' => 31, 'when' => function($model) {
                     return !$model->isNewRecord;
-            }],
+                }],
         ];
     }
 
@@ -61,6 +62,7 @@ class Blog extends ActiveRecord
             'slug' => $this->slug,
             'des' => $this->des,
             'logo' => $this->logo,
+            'constant_id' => $this->apiConstantId,
         ];
     }
 

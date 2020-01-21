@@ -19,6 +19,8 @@ use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use app\models\Province;
+use app\models\Color;
 
 class V1Controller extends Controller
 {
@@ -75,13 +77,24 @@ class V1Controller extends Controller
                 },
                 'rules' => [
                     [
-                        'actions' => ['search', 'product',],
+                        'actions' => ['constant', 'search', 'product',],
                         'allow' => true,
                         'verbs' => ['POST'],
                         'roles' => ['?', '@'],
                     ],
                 ],
             ],
+        ];
+    }
+
+    public static function actionConstant()
+    {
+        return [
+            'type' => FieldList::typeList(),
+            'filter' => FieldList::filterList(),
+            'opertaion' => FieldList::opertaionList(),
+            'color' => Color::getList(),
+            'province' => Province::getList(),
         ];
     }
 
@@ -253,8 +266,6 @@ class V1Controller extends Controller
         }
 
         return [
-            '_blog' => self::blog(),
-            '_customer' => self::customer(),
             '_categories' => $categories,
             'categoryId' => $categoryId,
             'products' => $products,
@@ -271,7 +282,6 @@ class V1Controller extends Controller
                 'page' => $pagination->getPage(),
                 'total_count' => $countOfResults,
             ],
-            'opertaions' => FieldList::opertaionList(),
         ];
     }
 
@@ -318,8 +328,6 @@ class V1Controller extends Controller
         $packages = Package::find()->where(['status' => Status::STATUS_ACTIVE, 'product_id' => $product['id']])->all();
 
         return [
-            '_blog' => self::blog(),
-            '_customer' => self::customer(),
             '_categories' => $categories,
             'categoryId' => $product['category_id'],
             'product' => $product,

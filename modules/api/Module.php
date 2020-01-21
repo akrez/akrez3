@@ -27,6 +27,8 @@ class Module extends \yii\base\Module
             } else {
                 $event->sender->data = (array) $event->sender->data;
                 $event->sender->data['code'] = $statusCode;
+                $event->sender->data['_blog'] = (Yii::$app->blog->getIdentity() ? Yii::$app->blog->getIdentity()->info() : []);
+                $event->sender->data['_customer'] = (Yii::$app->customerApi->getIdentity() ? Yii::$app->customerApi->getIdentity()->info() : []);
             }
         });
     }
