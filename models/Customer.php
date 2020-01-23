@@ -210,7 +210,7 @@ class Customer extends ActiveRecord implements IdentityInterface
     public function generateResetToken()
     {
         do {
-            $rand = rand(10000, 99999);
+            $rand = rand(100000, 999999);
             $model = self::find()->where(['reset_token' => $rand])->one();
         } while ($model != null);
         return $rand;
