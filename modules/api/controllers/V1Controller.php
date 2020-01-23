@@ -21,6 +21,8 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use app\models\Province;
 use app\models\Color;
+use app\models\Customer;
+use yii\web\BadRequestHttpException;
 
 class V1Controller extends Controller
 {
@@ -60,6 +62,21 @@ class V1Controller extends Controller
         return self::$_customer;
     }
 
+    public static function getFieldsList($categoryId = null)
+    {
+        $models = [
+            'title' => new Field(['attributes' => ['id' => 'title', 'title' => Yii::t('app', 'Title'), 'type' => FieldList::TYPE_STRING, 'filter' => FieldList::FILTER_STRING]]),
+            'price' => new Field(['attributes' => ['id' => 'price', 'title' => Yii::t('app', 'Price'), 'type' => FieldList::TYPE_NUMBER, 'filter' => FieldList::FILTER_NUMBER, 'unit' => 'ریال']]),
+            'exist' => new Field(['attributes' => ['id' => 'exist', 'title' => Yii::t('app', 'Exist'), 'type' => FieldList::TYPE_BOOLEAN, 'filter' => FieldList::FILTER_2STATE,]]),
+        ];
+
+        if ($categoryId) {
+            $models = $models + Field::find()->where(['category_id' => $categoryId])->orderBy(new Expression('-`seq` DESC'))->indexBy('id')->all();
+        }
+
+        return ArrayHelper::toArray($models);
+    }
+
     public function behaviors()
     {
         return [
@@ -77,10 +94,22 @@ class V1Controller extends Controller
                 },
                 'rules' => [
                     [
-                        'actions' => ['constant', 'search', 'product',],
+                        'actions' => ['constant', 'search', 'product', 'info',],
                         'allow' => true,
                         'verbs' => ['POST'],
                         'roles' => ['?', '@'],
+                    ],
+                    [
+                        'actions' => ['signin', 'signup', 'reset-password-request', 'reset-password'],
+                        'allow' => true,
+                        'verbs' => ['POST'],
+                        'roles' => ['?'],
+                    ],
+                    [
+                        'actions' => ['profile', 'signout'],
+                        'allow' => true,
+                        'verbs' => ['POST'],
+                        'roles' => ['@'],
                     ],
                 ],
             ],
@@ -96,21 +125,6 @@ class V1Controller extends Controller
             'color' => Color::getList(),
             'province' => Province::getList(),
         ];
-    }
-
-    public static function getFieldsList($categoryId = null)
-    {
-        $models = [
-            'title' => new Field(['attributes' => ['id' => 'title', 'title' => Yii::t('app', 'Title'), 'type' => FieldList::TYPE_STRING, 'filter' => FieldList::FILTER_STRING]]),
-            'price' => new Field(['attributes' => ['id' => 'price', 'title' => Yii::t('app', 'Price'), 'type' => FieldList::TYPE_NUMBER, 'filter' => FieldList::FILTER_NUMBER, 'unit' => 'ریال']]),
-            'exist' => new Field(['attributes' => ['id' => 'exist', 'title' => Yii::t('app', 'Exist'), 'type' => FieldList::TYPE_BOOLEAN, 'filter' => FieldList::FILTER_2STATE,]]),
-        ];
-
-        if ($categoryId) {
-            $models = $models + Field::find()->where(['category_id' => $categoryId])->orderBy(new Expression('-`seq` DESC'))->indexBy('id')->all();
-        }
-
-        return ArrayHelper::toArray($models);
     }
 
     public function actionSearch($categoryId = null)
@@ -285,7 +299,7 @@ class V1Controller extends Controller
         ];
     }
 
-    public static function actionProduct($id)
+    public function actionProduct($id)
     {
         $blog = self::blog();
         $categories = self::categories();
@@ -336,6 +350,79 @@ class V1Controller extends Controller
             'images' => ArrayHelper::toArray($images, ['name', 'updated_at', 'width', 'height']),
             'packages' => ArrayHelper::toArray($packages, ['price', 'guaranty', 'des']),
         ];
+    }
+
+    public function actionSignin()
+    {
+        $signin = Customer::signin(Yii::$app->request->post());
+        if ($signin == null) {
+            throw new BadRequestHttpException();
+        }
+        if ($user = $signin->getCustomer()) {
+            return $user->response(true);
+        }
+        return $signin->response();
+    }
+
+    public function actionSignout()
+    {
+        $signout = Yii::$app->customerApi->getIdentity();
+        if (!$signout) {
+            throw new NotFoundHttpException();
+        }
+        $signout = $signout->signout();
+        if ($signout == null) {
+            throw new BadRequestHttpException();
+        }
+        return $signout->response();
+    }
+
+    public function actionSignup()
+    {
+        $signup = Customer::signup(Yii::$app->request->post());
+        if ($signup == null) {
+            throw new BadRequestHttpException();
+        }
+        if ($signup->hasErrors()) {
+            return $signup->response();
+        }
+        return $signup->response(true);
+    }
+
+    public function actionResetPasswordRequest()
+    {
+        $resetPasswordRequest = Customer::resetPasswordRequest(Yii::$app->request->post());
+        if ($resetPasswordRequest == null) {
+            throw new BadRequestHttpException();
+        }
+        return $resetPasswordRequest->response();
+    }
+
+    public function actionResetPassword()
+    {
+        $resetPassword = Customer::resetPassword(Yii::$app->request->post());
+        if ($resetPassword == null) {
+            throw new BadRequestHttpException();
+        }
+        return $resetPassword->response();
+    }
+
+    public function actionProfile()
+    {
+        $profile = Yii::$app->customerApi->getIdentity();
+        if (!$profile) {
+            throw new NotFoundHttpException();
+        }
+        $profile = $profile->profile(Yii::$app->request->post());
+        if ($profile == null) {
+            throw new BadRequestHttpException();
+        }
+        return $this->response($profile);
+    }
+
+    public function actionInfo()
+    {
+        return [];
     }
 
 }

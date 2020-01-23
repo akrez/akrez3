@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use app\components\Email;
+use Exception;
 use Yii;
 use yii\web\IdentityInterface;
 
@@ -23,6 +25,7 @@ use yii\web\IdentityInterface;
  */
 class Customer extends ActiveRecord implements IdentityInterface
 {
+
     const TIMEOUT_RESET = 120;
 
     public $password;
@@ -69,19 +72,23 @@ class Customer extends ActiveRecord implements IdentityInterface
          */
 
         return [
+            //signup
             [0 => ['email',], 1 => 'required', 'on' => 'signup',],
-            [0 => ['email', '!blog_name'], 1 => 'unique', 'on' => 'signup',],
+            [0 => ['email',], 1 => 'unique', 'targetAttribute' => ['email', 'blog_name'], 'on' => 'signup',],
             [0 => ['email',], 1 => 'email', 'on' => 'signup',],
             [0 => ['password',], 1 => 'required', 'on' => 'signup',],
             [0 => ['password',], 1 => 'minLenValidation', 'params' => ['min' => 6,], 'on' => 'signup',],
+            //signin
             [0 => ['email',], 1 => 'required', 'on' => 'signin',],
             [0 => ['email',], 1 => 'email', 'on' => 'signin',],
             [0 => ['password',], 1 => 'required', 'on' => 'signin',],
             [0 => ['password',], 1 => 'passwordValidation', 'on' => 'signin',],
             [0 => ['password',], 1 => 'minLenValidation', 'params' => ['min' => 6,], 'on' => 'signin',],
+            //resetPasswordRequest
             [0 => ['email',], 1 => 'required', 'on' => 'resetPasswordRequest',],
             [0 => ['email',], 1 => 'findValidCustomerByEmailValidation', 'on' => 'resetPasswordRequest',],
             [0 => ['email',], 1 => 'email', 'on' => 'resetPasswordRequest',],
+            //resetPassword
             [0 => ['email',], 1 => 'required', 'on' => 'resetPassword',],
             [0 => ['email',], 1 => 'findValidCustomerByEmailResetTokenValidation', 'on' => 'resetPassword',],
             [0 => ['email',], 1 => 'email', 'on' => 'resetPassword',],
@@ -179,7 +186,7 @@ class Customer extends ActiveRecord implements IdentityInterface
 
     public function setAuthKey()
     {
-        return $this->token = Yii::$app->security->generateRandomString();
+        return $this->token = preg_replace("/[^a-z0-9A-Z]+/i", "", Yii::$app->security->generateRandomString());
     }
 
     public function setResetToken()
@@ -226,8 +233,99 @@ class Customer extends ActiveRecord implements IdentityInterface
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,
             'email' => $this->email,
-            'blog_name' => $this->blog_name,
             'token' => ($includeToken ? $this->token : null),
         ];
     }
+
+    public function response($includeToken = false)
+    {
+        return [
+            'customer' => $this->info($includeToken),
+            'errors' => $this->errors,
+        ];
+    }
+
+    /////
+
+    public static function signup($input)
+    {
+        try {
+            $signup = new Customer(['scenario' => 'signup']);
+            $signup->load($input, '');
+            $signup->status = Status::STATUS_UNVERIFIED;
+            $signup->blog_name = Yii::$app->blog->getIdentity()->name;
+            $signup->setAuthKey();
+            $signup->setPasswordHash($signup->password);
+            $signup->save();
+            return $signup;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    public static function signin($input)
+    {
+        try {
+            $signin = new Customer(['scenario' => 'signin']);
+            $signin->load($input, '');
+            $signin->validate();
+            return $signin;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    public function signout()
+    {
+        try {
+            $this->setAuthKey();
+            $this->save(false);
+            return $this;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    public static function resetPasswordRequest($input)
+    {
+        try {
+            $resetPasswordRequest = new Customer(['scenario' => 'resetPasswordRequest']);
+            $resetPasswordRequest->load($input, '');
+            if ($resetPasswordRequest->validate()) {
+                $user = $resetPasswordRequest->getCustomer();
+                $user->setResetToken();
+                if ($user->save(false)) {
+                    Email::customerResetPasswordRequest($user, Yii::$app->blog->getIdentity());
+                } else {
+                    return null;
+                }
+            }
+            return $resetPasswordRequest;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    public static function resetPassword($input)
+    {
+        try {
+            $resetPassword = new Customer(['scenario' => 'resetPassword']);
+            $resetPassword->load($input, '');
+            if ($resetPassword->validate()) {
+                $user = $resetPassword->getCustomer();
+                $user->reset_token = null;
+                $user->reset_at = null;
+                $user->status = Status::STATUS_ACTIVE;
+                $user->setPasswordHash($resetPassword->password);
+                if ($user->save(false)) {
+                    return $resetPassword;
+                }
+                return null;
+            }
+            return $resetPassword;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
 }

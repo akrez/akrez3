@@ -1,6 +1,37 @@
 <?php
 
 return [
+    // API ----->
+    'Newest' => 'جدید‌ترین',
+    'Oldest' => 'قدیمی‌ترین',
+    'Title (Desc)' => 'عنوان (نزولی)',
+    'Title (Asc)' => 'عنوان (صعودی)',
+    //
+    'Exist' => 'موجود',
+    'Title' => 'عنوان',
+    'Price' => 'قیمت',
+    //
+    'LIKE' => 'شامل شود',
+    'NOT LIKE' => 'شامل نشود',
+    'BIGGER THAN' => 'بیشتر از',
+    'SMALLER THAN' => 'کمتر از',
+    'EQUAL' => 'برابر با',
+    'NOT EQUAL' => 'نا برابر با',
+    'IN' => 'شامل شود',
+    'NOT IN' => 'شامل نشود',
+    'BE' => 'باشد',
+    'NOT BE' => 'نباشد',
+    //
+    'string' => 'متن',
+    'number' => 'عدد',
+    'boolean' => 'بله یا خیر',
+    'filter_string' => 'متن',
+    'filter_number' => 'عدد',
+    'filter_2state' => 'بله / مهم نیست',
+    'filter_3state' => 'بله / خیر / مهم نیست',
+    'filter_single' => 'لیست تک گزینه ای',
+    'filter_multi' => 'لیست چند گزینه ای',
+    // <----- API
     'alertRemoveDanger' => '{count} {child} مرتبط با این {parent} وجود دارد.',
     'alertRemoveSuccessfull' => 'اطلاعات با موفقیت حذف شد.',
     'alertRemoveUnSuccessfull' => 'حذف اطلاعات با خطا مواجه شد.',
