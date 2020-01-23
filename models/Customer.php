@@ -41,35 +41,6 @@ class Customer extends ActiveRecord implements IdentityInterface
      */
     public function rules()
     {
-        /*
-          $scenariosRules = [
-          'signup' => [
-          'email' => [['required'], ['unique'],],
-          'password' => [['required'],],
-          ],
-          'signin' => [
-          'email' => [['required']],
-          'password' => [['required'], ['passwordValidation']],
-          ],
-          'resetPasswordRequest' => [
-          'email' => [['required'], ['findValidCustomerByEmailValidation']],
-          ],
-          'resetPassword' => [
-          'email' => [['required'], ['findValidCustomerByEmailResetTokenValidation']],
-          'password' => [['required']],
-          'reset_token' => [['required']],
-          ],
-          ];
-          $attributesRules = [
-          'email' => [
-          ['email'],
-          ],
-          'password' => [
-          ['minLenValidation', 'params' => ['min' => 6]],
-          ],
-          ];
-          $r = \app\components\Helper::rulesDumper($scenariosRules, $attributesRules);
-         */
 
         return [
             //signup
