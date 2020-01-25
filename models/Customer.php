@@ -45,7 +45,7 @@ class Customer extends ActiveRecord implements IdentityInterface
         return [
             //signup
             [0 => ['email',], 1 => 'required', 'on' => 'signup',],
-            [0 => ['email',], 1 => 'unique', 'targetAttribute' => ['email', 'blog_name'], 'on' => 'signup',],
+            [0 => ['email',], 1 => 'unique', 'targetAttribute' => ['email', 'blog_name'], 'message' => Yii::t('yii', '{attribute} "{value}" has already been taken.'), 'on' => 'signup',],
             [0 => ['email',], 1 => 'email', 'on' => 'signup',],
             [0 => ['password',], 1 => 'required', 'on' => 'signup',],
             [0 => ['password',], 1 => 'minLenValidation', 'params' => ['min' => 6,], 'on' => 'signup',],
@@ -204,6 +204,8 @@ class Customer extends ActiveRecord implements IdentityInterface
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,
             'email' => $this->email,
+            'status' => $this->status,
+            'blog_name' => $this->blog_name,
             'token' => ($includeToken ? $this->token : null),
         ];
     }
