@@ -23,6 +23,8 @@ use app\models\Province;
 use app\models\Color;
 use app\models\Customer;
 use yii\web\BadRequestHttpException;
+use app\models\Basket;
+use app\models\Invoice;
 
 class V1Controller extends Controller
 {
@@ -106,7 +108,7 @@ class V1Controller extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['profile', 'signout'],
+                        'actions' => ['profile', 'signout', 'basket'],
                         'allow' => true,
                         'verbs' => ['POST'],
                         'roles' => ['@'],
@@ -407,22 +409,71 @@ class V1Controller extends Controller
         return $resetPassword->response();
     }
 
-    public function actionProfile()
-    {
-        $profile = Yii::$app->customerApi->getIdentity();
-        if (!$profile) {
-            throw new NotFoundHttpException();
-        }
-        $profile = $profile->profile(Yii::$app->request->post());
-        if ($profile == null) {
-            throw new BadRequestHttpException();
-        }
-        return $this->response($profile);
-    }
+    /*
+      public function actionProfile()
+      {
+      $profile = Yii::$app->customerApi->getIdentity();
+      if (!$profile) {
+      throw new NotFoundHttpException();
+      }
+      $profile = $profile->profile(Yii::$app->request->post());
+      if ($profile == null) {
+      throw new BadRequestHttpException();
+      }
+      return $profile->response();
+      }
+     * 
+     */
 
     public function actionInfo()
     {
         return [];
+    }
+
+    public static function actionBasket()
+    {
+        $blog = self::blog();
+        $customer = self::customer();
+        $categories = self::categories();
+        $params = Yii::$app->request->post();
+        //
+        $invoice = new Invoice();
+        $packages = [];
+        $products = [];
+
+        $baskets = Basket::find()
+                        ->where(['invoice_id' => null])
+                        ->andWhere(['customer_id' => $customer['id']])
+                        ->andWhere(['package_id' => Package::getActivePackagesQueryByCategories($categories)->select('id')])
+                        ->asArray()->indexBy('id')->all();
+
+        if ($baskets != []) {
+            $packages = Package::find()->where(['id' => ArrayHelper::getColumn($baskets, 'package_id')])->asArray()->indexBy('id')->all();
+            $products = Product::find()->where(['id' => ArrayHelper::getColumn($packages, 'product_id')])->asArray()->indexBy('id')->all();
+            if ($invoice->load($params)) {
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    $invoice->setPriceByArrayOfBasketsAndPackages($baskets, $packages);
+                    $invoice->status = Status::STATUS_UNVERIFIED;
+                    $invoice->blog_name = $blog['name'];
+                    $invoice->customer_id = $customer['id'];
+                    $invoice->save();
+                    Basket::updateAll(['invoice_id' => $invoice->id], ['id' => array_keys($baskets)]);
+                    $transaction->commit();
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
+            }
+        }
+
+        return [
+            '_categories' => $categories,
+            'baskets' => $baskets,
+            'packages' => $packages,
+            'products' => $products,
+            'invoice' => $invoice->attributes,
+            'errors' => $invoice->errors,
+        ];
     }
 
 }
