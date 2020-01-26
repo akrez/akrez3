@@ -108,7 +108,7 @@ class V1Controller extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['profile', 'signout', 'basket'],
+                        'actions' => ['profile', 'signout', 'basket', 'basket-add', 'basket-remove',],
                         'allow' => true,
                         'verbs' => ['POST'],
                         'roles' => ['@'],
@@ -473,6 +473,50 @@ class V1Controller extends Controller
             'products' => $products,
             'invoice' => $invoice->attributes,
             'errors' => $invoice->errors,
+        ];
+    }
+
+    public static function actionBasketAdd($package_id)
+    {
+        $blog = self::blog();
+        $customer = self::customer();
+        $categories = self::categories();
+        $cnt = Yii::$app->request->post('cnt');
+        //
+        Basket::$activeCategories = $categories;
+
+        $basket = Basket::findDuplicate($customer['id'], $package_id);
+        if ($basket == null) {
+            $basket = new Basket();
+            $basket->cnt = 0;
+        }
+        $basket->cnt = (empty($cnt) ? $basket->cnt + 1 : $cnt);
+        $basket->blog_name = $blog['name'];
+        $basket->customer_id = $customer['id'];
+        $basket->package_id = $package_id;
+        $basket->invoice_id = null;
+        $basket->save();
+
+        return [
+            '_categories' => $categories,
+            'package' => ($basket->package ? $basket->package->toArray() : null),
+            'basket' => $basket->attributes,
+            'errors' => $basket->errors,
+        ];
+    }
+
+    public static function actionBasketRemove($package_id)
+    {
+        $customer = self::customer();
+        //
+        $status = false;
+        $basket = Basket::findDuplicate($customer['id'], $package_id);
+        if ($basket) {
+            $status = $basket->delete();
+        }
+
+        return [
+            'status' => $status,
         ];
     }
 
