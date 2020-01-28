@@ -3,28 +3,28 @@
 namespace app\modules\api\controllers;
 
 use app\components\SingleSort;
+use app\models\Basket;
 use app\models\Category;
+use app\models\Color;
+use app\models\Customer;
 use app\models\Field;
 use app\models\FieldList;
 use app\models\FieldNumber;
 use app\models\FieldString;
 use app\models\Gallery;
+use app\models\Invoice;
 use app\models\Package;
 use app\models\Product;
+use app\models\Province;
 use app\models\Status;
 use Yii;
 use yii\base\DynamicModel;
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use app\models\Province;
-use app\models\Color;
-use app\models\Customer;
-use yii\web\BadRequestHttpException;
-use app\models\Basket;
-use app\models\Invoice;
 
 class V1Controller extends Controller
 {
@@ -126,6 +126,7 @@ class V1Controller extends Controller
             'opertaion' => FieldList::opertaionList(),
             'color' => Color::getList(),
             'province' => Province::getList(),
+            'invoiceStatuses' => Invoice::statuses(),
         ];
     }
 
@@ -542,6 +543,42 @@ class V1Controller extends Controller
             'products' => $products,
             'invoice' => $invoice->attributes,
             'errors' => $invoice->errors,
+        ];
+    }
+
+    public function actionInvoice()
+    {
+        $blog = self::blog();
+        $customer = self::customer();
+        $categories = self::categories();
+        //
+        $page = Yii::$app->request->post('page');
+
+        $query = Invoice::find()->where(['blog_name' => $blog['name']])->andWhere(['customer_id' => $customer['id']]);
+        $countOfResults = $query->count('id');
+
+        $pagination = new Pagination([
+            'params' => [
+                'page' => $page,
+                'per-page' => 15,
+            ],
+            'totalCount' => $countOfResults,
+        ]);
+
+        $invoices = [];
+        if ($countOfResults > 0) {
+            $invoices = $query->orderBy('id DESC')->offset($pagination->offset)->limit($pagination->limit)->indexBy('id')->asArray()->all();
+        }
+
+        return [
+            '_categories' => $categories,
+            'invoices' => $invoices,
+            'pagination' => [
+                'page_count' => $pagination->getPageCount(),
+                'page_size' => $pagination->getPageSize(),
+                'page' => $pagination->getPage(),
+                'total_count' => $countOfResults,
+            ],
         ];
     }
 

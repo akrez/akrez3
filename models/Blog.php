@@ -26,7 +26,7 @@ namespace app\models;
 class Blog extends ActiveRecord
 {
 
-    public $apiConstantId = '3ar8c9cfb05d8865d0ad9c02edffce40';
+    public $apiConstantId = '3ar8c9cfb05d8865d0ad9c02enffae40';
     public $image;
 
     public static function tableName()
