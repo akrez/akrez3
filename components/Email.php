@@ -9,12 +9,14 @@ use yii\base\Component;
 class Email extends Component
 {
 
-    public static $from;
+    public static $from = null;
 
-    public function init()
+    public static function getFrom()
     {
-        parent::init();
-        self::$from = ['akrezing@gmail.com' => APP_NAME];
+        if (self::$from === null) {
+            return ['akrezing@gmail.com' => APP_NAME];
+        }
+        return self::$from;
     }
 
     private static function send($to, $subject, $view, $params)
@@ -22,7 +24,7 @@ class Email extends Component
         try {
             return Yii::$app->mailer
                             ->compose($view, $params)
-                            ->setFrom(self::$from)
+                            ->setFrom(self::getFrom())
                             ->setTo($to)
                             ->setSubject($subject)
                             ->send();

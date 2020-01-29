@@ -1,3 +1,8 @@
+<?php
+
+use yii\helpers\Url;
+?>
+
 <div style="direction: rtl">
     <h4> <?= $_title ?> </h4>
     <?= $user->getAttributeLabel('email') ?>: <?= $user->email ?>

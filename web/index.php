@@ -70,7 +70,7 @@ $config = [
             'returnUrl' => null,
         ],
         'blog' => [
-            'class' => 'app\components\blogContainer',
+            'class' => 'app\components\BlogContainer',
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
