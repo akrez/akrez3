@@ -58,7 +58,7 @@ if ($model->isNewRecord) {
     <div class="row">
         <div class="col-sm-2">
             <div class="form-group">
-                <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Save') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success btn-block' : 'btn btn-primary btn-block']) ?>
+                <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success btn-block' : 'btn btn-primary btn-block']) ?>
             </div>
         </div>
         <div class="col-sm-6">
