@@ -582,4 +582,49 @@ class V1Controller extends Controller
         ];
     }
 
+    public static function actionInvoiceRemove($id)
+    {
+        $blog = self::blog();
+        $customer = self::customer();
+        $categories = self::categories();
+        //
+        $invoice = Invoice::find()->where(['id' => $id])->andWhere(['blog_name' => $blog['name']])->andWhere(['customer_id' => $customer['id']])->andWhere(['status' => [Invoice::STATUS_VERIFIED, Invoice::STATUS_UNVERIFIED]])->one();
+        if (empty($invoice)) {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+        if ($invoice->status == Invoice::STATUS_UNVERIFIED) {
+            $invoice->status = Invoice::STATUS_CUSTOMER_DELETED_UNVERIFIED;
+        } else {
+            $invoice->status = Invoice::STATUS_CUSTOMER_DELETED_VERIFIED;
+        }
+        return [
+            'status' => $invoice->save(false),
+        ];
+    }
+
+    public function actionInvoiceView($id)
+    {
+        $blog = self::blog();
+        $customer = self::customer();
+        $categories = self::categories();
+        //
+
+        $invoice = Invoice::find()->where(['id' => $id])->andWhere(['blog_name' => $blog['name']])->andWhere(['customer_id' => $customer['id']])->asArray()->one();
+        if (empty($invoice)) {
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        }
+
+        $baskets = Basket::find()->where(['invoice_id' => $invoice['id']])->asArray()->all();
+        $packages = Package::find()->where(['id' => ArrayHelper::getColumn($baskets, 'package_id')])->asArray()->indexBy('id')->all();
+        $products = Product::find()->where(['id' => ArrayHelper::getColumn($packages, 'product_id')])->asArray()->indexBy('id')->all();
+
+        return [
+            '_categories' => $categories,
+            'invoice' => $invoice,
+            'baskets' => $baskets,
+            'packages' => $packages,
+            'products' => $products,
+        ];
+    }
+
 }
