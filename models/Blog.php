@@ -36,7 +36,7 @@ class Blog extends ActiveRecord
 
     public function rules()
     {
-        return [
+        $rules = [
             [['status'], 'integer'],
             [['name', 'status', 'title', '!user_id'], 'required'],
             [['name'], 'string', 'max' => 31],
@@ -47,10 +47,11 @@ class Blog extends ActiveRecord
             [['logo'], 'string', 'max' => 16],
             [['name'], 'unique'],
             [['status'], 'in', 'range' => Status::getDefaultKeys()],
-            [['!name'], 'string', 'max' => 31, 'when' => function($model) {
-                    return !$model->isNewRecord;
-                }],
         ];
+        if (!$this->isNewRecord) {
+            $rules[] = [['!name'], 'string', 'max' => 31];
+        }
+        return $rules;
     }
 
     public function info()
