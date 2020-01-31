@@ -184,14 +184,14 @@ class FieldsController extends Controller
         $numberModel = new FieldNumber();
 
         if ($stringModel->formName() == $form_name) {
-            $this->wizard->searchModel = new FieldStringSearch();
+            $this->searchModel = new FieldStringSearch();
         } elseif ($numberModel->formName() == $form_name) {
-            $this->wizard->searchModel = new FieldNumberSearch();
+            $this->searchModel = new FieldNumberSearch();
         } else {
             throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
         }
 
-        $this->wizard->findModel($id)->delete();
+        $this->findModel($id)->delete();
 
         $redirectUrl = AdminHelper::url(['fields/index', 'parent_id' => $parent_id]);
         return $this->redirect($redirectUrl);
