@@ -62,6 +62,7 @@ class GalleryLogoController extends Controller
         if ($errors) {
             Yii::$app->session->setFlash('danger', reset($errors));
         } else {
+            $this->safeDefault($gallery->name);
             Yii::$app->session->setFlash('success', Yii::t('app', 'alertGalleryUploadSuccessfull'));
         }
 
@@ -80,11 +81,16 @@ class GalleryLogoController extends Controller
     {
         $this->wizard->findModel($name);
 
-        $this->wizard->parentModel->logo = $name;
-        $this->wizard->parentModel->save();
+        $this->safeDefault($name);
 
         $redirectUrl = AdminHelper::url(['gallery-logo/index']);
         return $this->redirect($redirectUrl);
+    }
+
+    private function safeDefault($name)
+    {
+        $this->wizard->parentModel->logo = $name;
+        return $this->wizard->parentModel->save();
     }
 
 }

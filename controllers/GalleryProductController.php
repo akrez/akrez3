@@ -62,6 +62,9 @@ class GalleryProductController extends Controller
         if ($errors) {
             Yii::$app->session->setFlash('danger', reset($errors));
         } else {
+            if (empty($this->wizard->parentModel->image)) {
+                $this->safeDefault($gallery->name, $this->wizard->parentModel);
+            }
             Yii::$app->session->setFlash('success', Yii::t('app', 'alertGalleryUploadSuccessfull'));
         }
 
@@ -81,11 +84,16 @@ class GalleryProductController extends Controller
         $this->wizard->findModel($name);
         $this->wizard->findParentModel($parent_id);
 
-        $this->wizard->parentModel->image = $name;
-        $this->wizard->parentModel->save();
+        $this->safeDefault($name, $this->wizard->parentModel);
 
         $redirectUrl = AdminHelper::url([0 => 'gallery-product/index', 'parent_id' => $parent_id]);
         return $this->redirect($redirectUrl);
+    }
+
+    private function safeDefault($name, $parentModel)
+    {
+        $parentModel->image = $name;
+        return $parentModel->save();
     }
 
 }
