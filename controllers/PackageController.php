@@ -33,7 +33,7 @@ class PackageController extends Controller
         $behaviors['access'] = [
             'rules' => [
                 [
-                    'actions' => ['index', 'remove', 'status'],
+                    'actions' => ['index', 'remove', 'status', 'update-price'],
                     'allow' => true,
                     'verbs' => ['POST', 'GET'],
                     'roles' => ['@'],
@@ -86,6 +86,27 @@ class PackageController extends Controller
         $this->wizard->findModel($id);
         $this->wizard->model->status = ($status == Status::STATUS_DISABLE ? Status::STATUS_DISABLE : Status::STATUS_ACTIVE);
         $this->wizard->model->save();
+        $redirectUrl = AdminHelper::url(['package/index', 'parent_id' => $parent_id]);
+        return $this->redirect($redirectUrl);
+    }
+
+    public function actionUpdatePrice($parent_id, $id)
+    {
+        if ($price = Yii::$app->request->post('price')) {
+            $this->wizard->findModel($id);
+            $model = new Package();
+            $model->load($this->wizard->model->attributes, '');
+            $model->price = $price;
+            $model->product_id = $this->wizard->model->product_id;
+            $model->blog_name = $this->wizard->model->blog_name;
+            if ($model->save()) {
+                $this->wizard->model->status = Status::STATUS_DELETED;
+                $this->wizard->model->save();
+            } else {
+                ed($model->errors);
+            }
+        }
+        //
         $redirectUrl = AdminHelper::url(['package/index', 'parent_id' => $parent_id]);
         return $this->redirect($redirectUrl);
     }

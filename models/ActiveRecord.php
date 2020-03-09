@@ -1,4 +1,5 @@
 <?php
+
 namespace app\models;
 
 use Yii;
@@ -24,14 +25,9 @@ class ActiveRecord extends BaseActiveRecord
         return true;
     }
 
-    public static function modelName()
-    {
-        $name = (new ReflectionClass(static::class))->getShortName();
-        return Yii::t('app', $name);
-    }
-
     public function attributeLabels()
     {
         return Model::attributeLabelsList();
     }
+
 }

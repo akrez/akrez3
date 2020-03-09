@@ -48,7 +48,18 @@ $this->render('_form', [
                 'format' => 'datetimefa',
                 'filter' => false,
             ],
-            'price:price',
+            [
+                'attribute' => Yii::t('app', 'price'),
+                'value' => function ($model, $key, $index, $grid) {
+                    $r = [];
+                    $r[] = Html::beginForm(Url::current(['package/update-price', 'id' => $model->id,]), 'POST');
+                    $btnUpdate = '<button type="submit" class="btn btn-primary" style="height: 34px;">' . Yii::t('app', 'Update') . '</button>';
+                    $r[] = '<div class="input-group"> ' . Html::input('number', 'price', $model['price'], ['class' => 'form-control', 'min' => '1',]) . '<span class="input-group-addon" id="sizing-addon1">ریال</span>' . ' <span class="input-group-btn">' . $btnUpdate . ' </span> </div> ';
+                    $r[] = Html::endForm();
+                    return implode(' ', $r);
+                },
+                'format' => 'raw',
+            ],
             'guaranty',
             [
                 'attribute' => 'color',
