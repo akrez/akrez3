@@ -134,6 +134,7 @@ class V1Controller extends Controller
     {
         $searchParams = Yii::$app->request->post('Search', []);
         $page = Yii::$app->request->post('page');
+        $pageSize = Yii::$app->request->post('page_size');
         $sort = Yii::$app->request->post('sort');
         //
         $blog = Yii::$app->blog->getIdentity();
@@ -240,10 +241,19 @@ class V1Controller extends Controller
             'sortAttributes' => $sortAttributes,
         ]);
 
+        $pageSize = intval($pageSize);
+        if ($pageSize == -1) {
+            $pageSize = $countOfResults;
+        } elseif ($pageSize > 0) {
+            $pageSize = $pageSize;
+        } else {
+            $pageSize = 12;
+        }
+
         $pagination = new Pagination([
             'params' => [
                 'page' => $page,
-                'per-page' => 12,
+                'per-page' => $pageSize,
             ],
             'totalCount' => $countOfResults,
         ]);
