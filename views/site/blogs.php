@@ -20,7 +20,7 @@ $this->title = Yii::t('app', 'Blogs');
                         <?= ($model->slug ? Html::tag('h4', Html::encode($model->slug)) : '') ?>
                         <?= ($model->des ? Html::tag('p', Html::encode($model->des), ['style' => 'text-align: justify;']) : '') ?>
                         <?= Html::a(' <span class="glyphicon glyphicon-road"></span> ' . 'ورود به پنل مدیریت', Url::to(['default/index', '_blog' => $model->name]), ['class' => 'btn btn-default btn-social']); ?>
-                        <?= Html::a(' <span class="glyphicon glyphicon-eye-open"></span> ' . 'نمایش', '../../default/' . $model->name . '/index', ['class' => 'btn btn-default btn-social']); ?>
+                        <?= Html::a(' <span class="glyphicon glyphicon-eye-open"></span> ' . 'نمایش', "http://".$model->name.".akrezing.ir/", ['class' => 'btn btn-default btn-social', 'target' => '_blank']); ?>
                     </div>
                 </div>
             <?php } ?>

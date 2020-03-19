@@ -26,6 +26,26 @@ $config = [
     ],
     'controllerNamespace' => 'app\controllers',
     'components' => [
+        'assetManager' => [
+            'class' => 'yii\web\AssetManager',
+            'bundles' => [
+                'yii\web\JqueryAsset' => [
+                    'js' => [
+                        YII_ENV !== 'prod' ? 'jquery.js' : 'jquery.min.js'
+                    ]
+                ],
+                'yii\bootstrap\BootstrapAsset' => [
+                    'css' => [
+                        YII_ENV !== 'prod' ? 'css/bootstrap.css' : 'css/bootstrap.min.css',
+                    ]
+                ],
+                'yii\bootstrap\BootstrapPluginAsset' => [
+                    'js' => [
+                        YII_ENV !== 'prod' ? 'js/bootstrap.js' : 'js/bootstrap.min.js',
+                    ]
+                ]
+            ],
+        ],
         'db' => $params['db'],
         'cache' => [
             'class' => 'yii\caching\FileCache',
