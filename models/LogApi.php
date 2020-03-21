@@ -3,45 +3,53 @@
 namespace app\models;
 
 use Yii;
+use app\components\Helper;
 
 /**
  * This is the model class for table "api".
  *
  * @property int $id
- * @property string $api_version
- * @property string $blog_name
- * @property string $created_at
+ * @property string|null $api_version
+ * @property string|null $blog_name
+ * @property string|null $created_at
  * @property int|null $user_id
  * @property string|null $user_agent
  * @property string|null $ip
- * @property string $action
+ * @property string|null $action
  * @property string|null $action_primary
  */
-class LogApi extends \yii\db\ActiveRecord
+class LogApi extends ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
+
+    public static function log($params)
+    {
+        $template = [
+            'api_version' => null,
+            'blog_name' => null,
+            'created_at' => null,
+            'user_id' => null,
+            'user_agent' => null,
+            'ip' => null,
+            'action' => null,
+            'action_primary' => null,
+        ];
+        $data = Helper::templatedArray($template, $params);
+        return Yii::$app->dbLog->createCommand()->insert('api', $data)->execute();
+    }
+
     public static function tableName()
     {
         return 'api';
     }
 
-    /**
-     * @return \yii\db\Connection the database connection used by this AR class.
-     */
     public static function getDb()
     {
         return Yii::$app->get('dbLog');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
-            [['api_version', 'blog_name', 'created_at', 'action'], 'required'],
             [['user_id'], 'integer'],
             [['api_version'], 'string', 'max' => 5],
             [['blog_name'], 'string', 'max' => 31],
@@ -52,21 +60,4 @@ class LogApi extends \yii\db\ActiveRecord
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'api_version' => 'Api Version',
-            'blog_name' => 'Blog Name',
-            'created_at' => 'Created At',
-            'user_id' => 'User ID',
-            'user_agent' => 'User Agent',
-            'ip' => 'Ip',
-            'action' => 'Action',
-            'action_primary' => 'Action Primary',
-        ];
-    }
 }
