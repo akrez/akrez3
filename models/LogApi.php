@@ -17,6 +17,7 @@ use app\components\Helper;
  * @property string|null $ip
  * @property string|null $action
  * @property string|null $action_primary
+ * @property string|null $params
  */
 class LogApi extends ActiveRecord
 {
@@ -32,6 +33,7 @@ class LogApi extends ActiveRecord
             'ip' => null,
             'action' => null,
             'action_primary' => null,
+            'params' => null,
         ];
         $data = Helper::templatedArray($template, $params);
         return Yii::$app->dbLog->createCommand()->insert('api', $data)->execute();
@@ -57,6 +59,7 @@ class LogApi extends ActiveRecord
             [['user_agent'], 'string', 'max' => 2047],
             [['ip'], 'string', 'max' => 17],
             [['action', 'action_primary'], 'string', 'max' => 63],
+            [['params'], 'string', 'max' => 8192],
         ];
     }
 

@@ -47,6 +47,7 @@ $config = [
             ],
         ],
         'db' => $params['db'],
+        'dbLog' => $params['dbLog'],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

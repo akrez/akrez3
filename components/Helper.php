@@ -7,6 +7,7 @@ use yii\helpers\VarDumper;
 
 class Helper extends Component
 {
+
     public static function normalizeArray($arr, $arrayOut = false)
     {
         if (is_array($arr)) {
@@ -24,6 +25,11 @@ class Helper extends Component
             return $arr;
         }
         return implode(",", $arr);
+    }
+
+    public static function templatedArray($template = [], $values = [], $const = [])
+    {
+        return $const + array_intersect_key($values, $template) + $template;
     }
 
     public function normalizeEmail($email)
@@ -74,4 +80,5 @@ class Helper extends Component
         }
         return VarDumper::export($rules);
     }
+
 }
