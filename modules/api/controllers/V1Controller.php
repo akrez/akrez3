@@ -40,10 +40,11 @@ class V1Controller extends Controller
         $blog = self::blog();
         @LogApi::log($params + [
                     'action_primary' => null,
-                    'ip' => \Yii::$app->request->remoteIp,
+                    'ip' => (isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : Yii::$app->request->getUserIP()), //TODO
                     'api_version' => \Yii::$app->controller->id,
                     'blog_name' => $blog['name'],
-                    'created_at' => Jdf::jdate('Y-m-d H:i:s'),
+                    'created_date' => Jdf::jdate('Y-m-d'),
+                    'created_time' => \date('H:i:s'),
                     'user_id' => \Yii::$app->user->getId(),
                     'user_agent' => \Yii::$app->request->getUserAgent(),
                     'action' => \Yii::$app->controller->action->id,
@@ -452,7 +453,7 @@ class V1Controller extends Controller
     /*
       public function actionProfile()
       {
-        $this->log();
+      $this->log();
       $profile = Yii::$app->customerApi->getIdentity();
       if (!$profile) {
       throw new NotFoundHttpException();

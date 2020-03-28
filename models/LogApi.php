@@ -11,7 +11,8 @@ use app\components\Helper;
  * @property int $id
  * @property string|null $api_version
  * @property string|null $blog_name
- * @property string|null $created_at
+ * @property string|null $created_date
+ * @property string|null $created_time
  * @property int|null $user_id
  * @property string|null $user_agent
  * @property string|null $ip
@@ -27,7 +28,8 @@ class LogApi extends ActiveRecord
         $template = [
             'api_version' => null,
             'blog_name' => null,
-            'created_at' => null,
+            'created_date' => null,
+            'created_time' => null,
             'user_id' => null,
             'user_agent' => null,
             'ip' => null,
@@ -55,7 +57,7 @@ class LogApi extends ActiveRecord
             [['user_id'], 'integer'],
             [['api_version'], 'string', 'max' => 5],
             [['blog_name'], 'string', 'max' => 31],
-            [['created_at'], 'string', 'max' => 20],
+            [['created_date', 'created_time'], 'string', 'max' => 11],
             [['user_agent'], 'string', 'max' => 2047],
             [['ip'], 'string', 'max' => 17],
             [['action', 'action_primary'], 'string', 'max' => 63],
