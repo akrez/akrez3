@@ -41,6 +41,23 @@ class LogApi extends ActiveRecord
         return Yii::$app->dbLog->createCommand()->insert('api', $data)->execute();
     }
 
+    public static function statSummary($blogName, $createdDateFrom)
+    {
+        return Yii::$app->dbLog->createCommand("
+            SELECT
+                IF(`action_primary` IS NULL, 0, 1) AS have_action_primary,
+                `created_date`,
+                COUNT(`id`) AS cnt
+            FROM
+                `api`
+            WHERE
+                (`blog_name` = :blog_name) AND :created_date_from < `created_date` AND `action` = 'search'
+            GROUP BY
+                have_action_primary,
+                `created_date`
+        ", [':blog_name' => $blogName, ':created_date_from' => $createdDateFrom])->queryAll();
+    }
+
     public static function tableName()
     {
         return 'api';
