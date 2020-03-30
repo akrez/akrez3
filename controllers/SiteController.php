@@ -110,7 +110,7 @@ class SiteController extends Controller
         try {
             $signin = new User(['scenario' => 'signin']);
             if ($signin->load(Yii::$app->request->post()) && $signin->validate()) {
-                Yii::$app->user->login($signin->getUser());
+                Yii::$app->user->login($signin->getUser(), 86400);
                 return $this->goBack();
             }
             return $this->render('signin', ['model' => $signin]);

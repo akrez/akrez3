@@ -44,7 +44,7 @@ return [
     //
     'Categories' => 'دسته‌بندی ها',
     'Category' => 'دسته‌بندی',
-    'Invoices' => 'فاکتورها',
+    'Invoices' => 'سفارشات',
     'Signin' => 'ورود',
     'Signout' => 'خروج',
     'Signup' => 'ثبت‌نام',
