@@ -1,5 +1,24 @@
 <?php
 
+function dd(...$input)
+{
+    foreach ($input as $i) {
+        var_dump($i);
+    }
+    die;
+}
+
+function jd(...$input)
+{
+    die(json_encode($input));
+}
+
+function ed($input)
+{
+    var_export($input);
+    die;
+}
+
 defined('YII_DEBUG') or define('YII_DEBUG', true);
 defined('YII_ENV') or define('YII_ENV', 'dev');
 defined('BASE_PATH') or define('BASE_PATH', dirname(__DIR__));
