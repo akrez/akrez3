@@ -68,14 +68,6 @@ $this->render('_form', [
             [
                 'format' => 'html',
                 'value' => function ($model, $key, $index, $grid) {
-                    return Html::a(' <span class="glyphicon glyphicon-tag"></span> ' . Yii::t('app', 'Garanties'), Url::current([0 => 'category-garanties/index', 'id' => $model->id]), [
-                                'class' => 'btn btn-default btn-block btn-social',
-                    ]);
-                },
-            ],
-            [
-                'format' => 'html',
-                'value' => function ($model, $key, $index, $grid) {
                     return Html::a(' <span class="glyphicon glyphicon-grain"></span> ' . Yii::t('app', 'Products'), Url::current([0 => 'product/index', 'parent_id' => $model->id]), [
                                 'class' => 'btn btn-default btn-block btn-social',
                                 'data-pjax' => '0',

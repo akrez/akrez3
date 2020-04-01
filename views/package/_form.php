@@ -6,6 +6,11 @@ use kartik\select2\Select2;
 use yii\helpers\Html;
 use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
+$this->registerCss('
+.select2-container--krajee .select2-selection {
+    border-radius: 4px 0 0 4px;
+}
+');
 ?>
 
 <?php
@@ -22,7 +27,7 @@ $form = ActiveForm::begin([
 <div class="row">
     <div class="col-xs-12 col-sm-4">
         <?=
-        $form->field($model, 'guaranty')->widget(Select2::classname(), [
+		$form->field($model, 'guaranty')->widget(Select2::classname(), [
             'data' => $garanties,
             'options' => [
                 'placeholder' => '',
@@ -30,9 +35,18 @@ $form = ActiveForm::begin([
                 'dir' => 'rtl',
             ],
             'pluginOptions' => [
-                'allowClear' => true
+                'allowClear' => true,
+                'tags' => true,
+                'createTag' => new JsExpression("function (params) {
+                    return {
+                        id: params.term,
+                        text: params.term,
+                        newOption: true
+                    }
+                }"),
             ],
         ]);
+        $this->registerCss('.' . 'select2-search__field' . ' { background: none !important; } ');
         ?>
     </div>
     <div class="col-xs-12 col-sm-4">

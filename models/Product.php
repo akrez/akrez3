@@ -40,4 +40,14 @@ class Product extends ActiveRecord
         ];
     }
 
+    public function getPackages()
+    {
+        return $this->hasMany(Package::className(), ['product_id' => 'id']);
+    }
+
+    public function getCategory()
+    {
+        return $this->hasOne(Category::className(), ['id' => 'category_id']);
+    }
+
 }
