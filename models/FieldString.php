@@ -8,7 +8,7 @@ use Yii;
  * This is the model class for table "field_string".
  *
  * @property int $id
- * @property int $updated_at
+ * @property int|null $updated_at
  * @property string $value
  * @property int $product_id
  * @property int $field_id
@@ -28,7 +28,7 @@ class FieldString extends Fields
     {
         return array_merge([
             [['value'], 'safe'],
-                ], parent::rules());
+        ], parent::rules());
     }
 
 }
