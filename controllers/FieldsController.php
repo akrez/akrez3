@@ -14,6 +14,7 @@ use app\models\Product;
 use Yii;
 use yii\web\NotFoundHttpException;
 use app\components\WizardController;
+use yii\helpers\ArrayHelper;
 
 class FieldsController extends Controller
 {
@@ -32,7 +33,7 @@ class FieldsController extends Controller
         $behaviors['access'] = [
             'rules' => [
                 [
-                    'actions' => ['index', 'create', 'delete'],
+                    'actions' => ['index', 'delete'],
                     'allow' => true,
                     'verbs' => ['POST', 'GET'],
                     'roles' => ['@'],
@@ -44,138 +45,54 @@ class FieldsController extends Controller
 
     public function actionIndex($parent_id)
     {
-        $parentModel = $this->findParentModel($parent_id);
-
+        $parentModel = $this->wizard->findParentModel($parent_id);
         $categoryFields = FieldSearch::userValidQuery()->andWhere(['category_id' => $parentModel->category_id])->indexBy('id')->all();
-
         $updatedAt = time();
-
-        $newModels = [];
+        //
+        $models = [];
+        $insertDatas = [];
+        $updateFieldsOptions = [];
+        //
         foreach ($categoryFields as $fieldId => $categoryField) {
-            if ($categoryField->type == FieldList::TYPE_STRING) {
+            if (in_array($categoryField->type, [FieldList::TYPE_STRING])) {
                 $model = new FieldString();
             } elseif (in_array($categoryField->type, [FieldList::TYPE_NUMBER, FieldList::TYPE_BOOLEAN])) {
                 $model = new FieldNumber();
             } else {
                 break;
             }
-            $model->field = $categoryField;
             $model->updated_at = $updatedAt;
             $model->product_id = $parent_id;
             $model->field_id = $fieldId;
-            $newModels[$fieldId] = $model;
+            //
+            $model->value = (string) ArrayHelper::getValue(Yii::$app->request->post(), $model->formName() . ".$fieldId.value");
+            if ($model->value != '' && $model->validate()) {
+                $updateFieldsOptions[] = $model->field_id;
+                $insertDatas[$model->tableName()][] = [$model->updated_at, $model->value, $model->product_id, $model->field_id];
+                $model->value = '';
+            }
+            //
+            $models[$fieldId] = $model;
         }
-
-        if (Yii::$app->request->post('create')) {
-            $this->create($categoryFields, new FieldString(), $newModels);
-            $this->create($categoryFields, new FieldNumber(), $newModels);
-            $url = AdminHelper::url(['fields/index', 'parent_id' => $parentModel->id]);
-            return $this->redirect($url);
+        //
+        foreach ($insertDatas as $tableName => $insertData) {
+            Yii::$app->db->createCommand()->batchInsert($tableName, ['updated_at', 'value', 'product_id', 'field_id'], $insertData)->execute();
         }
-
-        $dbStringModels = $this->update($categoryFields, new FieldString(), new FieldStringSearch());
-        $dbNumberModels = $this->update($categoryFields, new FieldNumber(), new FieldNumberSearch());
-
+        //
+        foreach ($categoryFields as $fieldId => $categoryField) {
+            if (in_array($fieldId, $updateFieldsOptions)) {
+                $this->updateFieldsOptions($categoryField);
+            }
+        }
+        //
         return $this->render('index', [
-                    'models' => [
-                        'update' => array_merge($dbStringModels, $dbNumberModels),
-                        'create' => $newModels,
-                    ],
                     'parentModel' => $parentModel,
                     'categoryFields' => $categoryFields,
+                    'models' => [
+                        'create' => $models,
+                        'update' => array_merge($this->fetchUpdateModels(new FieldStringSearch), $this->fetchUpdateModels(new FieldNumberSearch)),
+                    ],
         ]);
-    }
-
-    public function update($categoryFields, $instanceModel, $instanceSearchModel)
-    {
-        $models = $instanceSearchModel->userValidQuery()->andWhere(['product_id' => $this->wizard->parentModel->id])->orderBy('field_id')->indexBy('id')->all();
-        foreach ($models as $id => $model) {
-            $model->field = isset($categoryFields[$model->field_id]) ? $categoryFields[$model->field_id] : null;
-        }
-
-        $postedDatas = (array) Yii::$app->request->post($instanceModel->formName(), []);
-        if (Yii::$app->request->post('update') && $postedDatas) {
-            $deleteDatas = [];
-            $insertDatas = [];
-
-            $tableName = null;
-
-            foreach ($postedDatas as $id => $postedData) {
-                if (isset($models[$id])) {
-                    $model = $models[$id];
-                } else {
-                    continue;
-                }
-
-                if ($model->load($postedData, '')) {
-                    
-                } else {
-                    continue;
-                }
-
-                if ($model->validate()) {
-                    $tableName = $model->tableName();
-                    $deleteDatas[] = ['=', 'id', $id];
-                    $insertDatas[] = [$model->id, $model->updated_at, $model->value, $model->product_id, $model->field_id];
-                } else {
-                    continue;
-                }
-            }
-
-            if ($tableName) {
-                $transaction = Yii::$app->db->beginTransaction();
-                try {
-                    Yii::$app->db->createCommand()->delete($tableName, array_merge(['OR'], $deleteDatas))->execute();
-                    Yii::$app->db->createCommand()->batchInsert($tableName, ['id', 'updated_at', 'value', 'product_id', 'field_id'], $insertDatas)->execute();
-                    $transaction->commit();
-                } catch (Exception $e) {
-                    $transaction->rollBack();
-                }
-            }
-        }
-        return $models;
-    }
-
-    public function create($categoryFields, $instanceModel, $models)
-    {
-        $postedDatas = (array) Yii::$app->request->post($instanceModel->formName(), []);
-        if ($postedDatas) {
-            $insertDatas = [];
-
-            $tableName = null;
-
-            foreach ($postedDatas as $id => $postedData) {
-                if (isset($models[$id]) && $models[$id]->formName() == $instanceModel->formName()) {
-                    $model = $models[$id];
-                } else {
-                    continue;
-                }
-
-                if ($model->load($postedData, '')) {
-                    
-                } else {
-                    continue;
-                }
-
-                if ($model->validate()) {
-                    $tableName = $model->tableName();
-                    $insertDatas[] = [$model->updated_at, $model->value, $model->product_id, $model->field_id];
-                } else {
-                    continue;
-                }
-            }
-
-            if ($tableName) {
-                $transaction = Yii::$app->db->beginTransaction();
-                try {
-                    Yii::$app->db->createCommand()->batchInsert($tableName, ['updated_at', 'value', 'product_id', 'field_id'], $insertDatas)->execute();
-                    $transaction->commit();
-                } catch (Exception $e) {
-                    $transaction->rollBack();
-                }
-            }
-        }
-        return $models;
     }
 
     public function actionDelete($parent_id, $id, $form_name)
@@ -193,17 +110,32 @@ class FieldsController extends Controller
 
         $this->wizard->delete($id);
 
+        $categoryField = FieldSearch::userValidQuery()->andWhere(['id' => $this->wizard->model->field_id])->one();
+        $this->updateFieldsOptions($categoryField);
+
         $redirectUrl = AdminHelper::url(['fields/index', 'parent_id' => $parent_id]);
         return $this->redirect($redirectUrl);
     }
 
-    public function findParentModel($id)
+    private function fetchUpdateModels($instanceSearchModel)
     {
-        $this->wizard->parentModel = $this->wizard->parentSearchModel->userValidQuery($id)->one();
-        if ($this->wizard->parentModel) {
-            return $this->wizard->parentModel;
+        return $instanceSearchModel->userValidQuery()->andWhere(['product_id' => $this->wizard->parentModel->id])->orderBy('field_id')->indexBy('id')->all();
+    }
+
+    private function updateFieldsOptions($categoryField)
+    {
+        $model = null;
+        if (in_array($categoryField->type, [FieldList::TYPE_STRING])) {
+            $model = new FieldStringSearch();
+        } elseif (in_array($categoryField->type, [FieldList::TYPE_NUMBER, FieldList::TYPE_BOOLEAN])) {
+            $model = new FieldNumberSearch();
         }
-        throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+        //
+        if ($model) {
+            $categoryField->options = $model->userValidQuery()->select('value')->andWhere(['field_id' => $categoryField->id])->groupBy('value')->column();
+            sort($categoryField->options);
+            $categoryField->save();
+        }
     }
 
 }

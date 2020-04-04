@@ -18,20 +18,10 @@ namespace app\models;
 class Fields extends ActiveRecord
 {
 
-    public $field;
-
-    public function getFieldAttribute($attribute)
-    {
-        if ($this->field) {
-            return $this->field->$attribute;
-        }
-        return null;
-    }
-
     public function rules()
     {
         return [
-            [['!product_id', '!field_id', '!field', 'value'], 'required'],
+            [['!product_id', '!field_id', 'value'], 'required'],
         ];
     }
 
