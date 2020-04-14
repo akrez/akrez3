@@ -1,6 +1,7 @@
 <?php
 
 use app\components\AdminHelper;
+use app\components\Helper;
 use app\models\FieldList;
 use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
@@ -39,12 +40,17 @@ foreach ($models as $model):
             $inputOptions['disabled'] = 'disabled';
         }
         if (in_array($fieldtype, [FieldList::TYPE_STRING, FieldList::TYPE_NUMBER,])) {
+            if (is_array($field['options'])) {
+                
+            } else {
+                $field['options'] = Helper::normalizeArray($field['options'], true);
+            }
             $unit = $field['unit'];
             echo $form->field($model, "{$namePrefix}value", ['template' => '<div class="input-group">{label}{input}{hint}</div>{error}', 'options' => ['class' => 'col-xs-12 col-sm-8 col-md-9 col-lg-9',]])->widget(AutoComplete::classname(), [
                 'options' => $inputOptions,
                 'clientOptions' => [
                     'minLength' => 0,
-                    'source' => array_filter(explode(',', $field['options'])),
+                    'source' => $field['options'],
                 ],
             ])->label(isset($categoryFieldsTitle[$model->field_id]) ? Html::encode($categoryFieldsTitle[$model->field_id]) : false)->hint($unit ? Html::encode($unit) : false);
         } elseif (in_array($fieldtype, [FieldList::TYPE_BOOLEAN,])) {

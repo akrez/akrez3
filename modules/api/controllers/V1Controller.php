@@ -18,7 +18,7 @@ use app\models\Product;
 use app\models\Province;
 use app\models\Status;
 use Yii;
-use yii\base\DynamicModel;
+use app\models\Search;
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -32,7 +32,7 @@ class V1Controller extends Controller
 {
 
     private static $_blog = false;
-    private static $_categories = false;
+    private static $_categoriesList = false;
     private static $_customer = false;
 
     public static function log($params = [])
@@ -66,13 +66,27 @@ class V1Controller extends Controller
         return self::$_blog;
     }
 
-    public static function categories()
+    public static function categoriesList()
     {
         $blog = self::blog();
-        if (self::$_categories === false) {
-            self::$_categories = Category::find()->select(['title', 'id'])->where(['blog_name' => $blog['name'], 'status' => Status::STATUS_ACTIVE])->indexBy('id')->asArray()->column();
+        if (self::$_categoriesList === false) {
+            self::$_categoriesList = Category::find()->where(['blog_name' => $blog['name'], 'status' => Status::STATUS_ACTIVE])->indexBy('id')->all();
         }
-        return self::$_categories;
+        return self::$_categoriesList;
+    }
+
+    public static function category($categoryId)
+    {
+        $categories = self::categoriesList();
+        if (isset($categories[$categoryId])) {
+            return $categories[$categoryId];
+        }
+        return null;
+    }
+
+    public static function categories()
+    {
+        return ArrayHelper::map(self::categoriesList(), 'id', 'title');
     }
 
     public static function customer()
@@ -89,9 +103,9 @@ class V1Controller extends Controller
     public static function getFieldsList($categoryId = null)
     {
         $models = [
-            'title' => new Field(['attributes' => ['id' => 'title', 'title' => Yii::t('app', 'Title'), 'type' => FieldList::TYPE_STRING, 'filter' => FieldList::FILTER_STRING]]),
-            'price' => new Field(['attributes' => ['id' => 'price', 'title' => Yii::t('app', 'Price'), 'type' => FieldList::TYPE_NUMBER, 'filter' => FieldList::FILTER_NUMBER, 'unit' => 'ریال']]),
-            'exist' => new Field(['attributes' => ['id' => 'exist', 'title' => Yii::t('app', 'Exist'), 'type' => FieldList::TYPE_BOOLEAN, 'filter' => FieldList::FILTER_2STATE,]]),
+            'title' => new Field(['attributes' => ['id' => 'title', 'title' => Yii::t('app', 'Title'), 'type' => FieldList::TYPE_STRING, 'widgets' => [FieldList::getDefaultWidgetOfType(FieldList::TYPE_STRING)]]]),
+            'price' => new Field(['attributes' => ['id' => 'price', 'title' => Yii::t('app', 'Price'), 'type' => FieldList::TYPE_NUMBER, 'widgets' => [$categoryId ? FieldList::getDefaultWidgetOfType(FieldList::TYPE_NUMBER) : FieldList::WIDGET_SMALLER], 'unit' => 'ریال']]),
+            'exist' => new Field(['attributes' => ['id' => 'exist', 'title' => Yii::t('app', 'Exist'), 'type' => FieldList::TYPE_BOOLEAN, 'widgets' => [FieldList::getDefaultWidgetOfType(FieldList::TYPE_BOOLEAN)]]]),
         ];
 
         if ($categoryId) {
@@ -142,11 +156,11 @@ class V1Controller extends Controller
 
     public static function actionConstant()
     {
-        self::log(['action_primary' => $categoryId]);
+        self::log();
         return [
             'type' => FieldList::typeList(),
-            'filter' => FieldList::filterList(),
-            'opertaion' => FieldList::opertaionList(),
+            'widget' => FieldList::typesWidgetsList(),
+            'opertaion' => FieldList::typesOpertaionsList(),
             'color' => Color::getList(),
             'province' => Province::getList(),
             'invoiceStatuses' => Invoice::statuses(),
@@ -173,9 +187,15 @@ class V1Controller extends Controller
         $query = Product::find()->where(['AND', ['blog_name' => $blog['name'], 'status' => Status::STATUS_ACTIVE,]]);
         //
         $categories = self::categories();
-        if ($categoryId && isset($categories[$categoryId])) {
+        if ($categoryId) {
+            $category = self::category($categoryId);
+            if (!$category) {
+                throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
+            }
+            $category = $category->export();
             $query->andWhere(['category_id' => $categoryId,]);
         } else {
+            $category = null;
             $query->andWhere(['category_id' => array_keys($categories),]);
             $categoryId = null;
         }
@@ -189,15 +209,12 @@ class V1Controller extends Controller
                 continue;
             }
             foreach ($searchParams[$fieldId] as $filter) {
-                $model = DynamicModel::validateData(['field' => $fieldId, 'type' => $field['type'], 'category_id' => $field['category_id'], 'operation' => null, 'value' => null], [
-                            [['!field', '!type', 'operation', 'value',], 'required'],
-                            [['operation'], 'in', 'range' => array_keys(FieldList::getFilterOpertaion($field['filter']))],
-                ]);
+                $model = new Search();
                 $model->load($filter, '');
+                $model->field = $fieldId;
+                $model->type = $field['type'];
+                $model->category_id = $field['category_id'];
                 if ($model->validate()) {
-                    if ($model->operation == FieldList::FILTER_MULTI) {
-                        $model->value = Helper::normalizeArray($model->value, true);
-                    }
                     $search[$fieldId][] = $model->toArray();
                 }
             }
@@ -216,7 +233,14 @@ class V1Controller extends Controller
                     if ($filter['type'] == FieldList::TYPE_STRING) {
                         $fieldStringHasFilter = true;
                         $fieldStringQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['value']], ['=', 'field_id', $filter['field']]]);
-                    } elseif ($filter['type'] == FieldList::TYPE_NUMBER || $filter['type'] == FieldList::TYPE_BOOLEAN) {
+                    } elseif ($filter['type'] == FieldList::TYPE_NUMBER) {
+                        $fieldNumberHasFilter = true;
+                        if ($filter['operation'] == FieldList::OPERATION_BETWEEN) {
+                            $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['value'][0], $filter['value'][1],], ['=', 'field_id', $filter['field']]]);
+                        } else {
+                            $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['value']], ['=', 'field_id', $filter['field']]]);
+                        }
+                    } elseif ($filter['type'] == FieldList::TYPE_BOOLEAN) {
                         $fieldNumberHasFilter = true;
                         $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['value']], ['=', 'field_id', $filter['field']]]);
                     }
@@ -235,6 +259,8 @@ class V1Controller extends Controller
                         $query->andFilterWhere(['OR', [$filter['operation'], 'price_min', $filter['value']], [$filter['operation'], 'price_min', $filter['value']]]);
                     } elseif ($filter['operation'] == 'NOT IN') {
                         $query->andFilterWhere(['AND', [$filter['operation'], 'price_min', $filter['value']], [$filter['operation'], 'price_min', $filter['value']]]);
+                    } elseif ($filter['operation'] == FieldList::OPERATION_BETWEEN) {
+                        $query->andFilterWhere(['AND', ['>=', 'price_min', $filter['value'][0]], ['<=', 'price_min', $filter['value'][1]]]);
                     }
                 } elseif ($filter['field'] == 'exist') {
                     if (($filter['operation'] == '=') == boolval($filter['value'])) {
@@ -319,6 +345,7 @@ class V1Controller extends Controller
         return [
             '_categories' => $categories,
             'categoryId' => $categoryId,
+            'category' => $category,
             'products' => $products,
             'productsFields' => $productsFields,
             'search' => $search,

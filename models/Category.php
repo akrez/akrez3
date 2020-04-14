@@ -83,4 +83,18 @@ class Category extends ActiveRecord
         return [];
     }
 
+    public function export()
+    {
+        return [
+            'id' => $this->id,
+            'updated_at' => $this->updated_at,
+            'status' => $this->status,
+            'title' => $this->title,
+            'blog_name' => $this->blog_name,
+            'garanties' => $this->garanties,
+            'price_min' => $this->price_min,
+            'price_max' => $this->price_max,
+        ];
+    }
+
 }

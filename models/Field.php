@@ -23,6 +23,7 @@ use app\components\Helper;
 class Field extends ActiveRecord
 {
 
+    public $widgets;
     public $unit;
     public $value_max;
     public $label_no;
@@ -46,9 +47,9 @@ class Field extends ActiveRecord
             [['options'], 'safe'],
             [['type'], 'in', 'range' => array_keys(FieldList::typeList())],
             [['in_summary'], 'boolean'],
-            [['filter'], 'in', 'skipOnError' => true, 'range' => function ($model, $attribute) {
-                    return array_keys(FieldList::getTypeFilter($model->type));
-                }],
+            [['widgets'], 'each', 'rule' => ['in', 'skipOnError' => true, 'range' => function ($model, $attribute) {
+                        return array_keys(FieldList::getTypeWidgets($model->type));
+                    }]],
         ];
 
         if (!$this->isNewRecord) {
@@ -62,6 +63,7 @@ class Field extends ActiveRecord
     {
         parent::afterFind();
         $arrayParams = (array) Json::decode($this->params) + [
+            'widgets' => [],
             'unit' => null,
             'value_max' => null,
             'label_no' => null,
@@ -69,6 +71,7 @@ class Field extends ActiveRecord
             'options' => null,
         ];
 
+        $this->widgets = $arrayParams['widgets'];
         $this->unit = $arrayParams['unit'];
         $this->value_max = $arrayParams['value_max'];
         $this->label_no = $arrayParams['label_no'];
@@ -86,6 +89,7 @@ class Field extends ActiveRecord
         $this->options = Helper::normalizeArray($this->options);
 
         $this->params = [
+            'widgets' => $this->widgets,
             'unit' => $this->unit,
             'value_max' => $this->value_max,
             'label_no' => $this->label_no,
@@ -103,7 +107,7 @@ class Field extends ActiveRecord
             'id' => $this->id,
             'title' => $this->title,
             'type' => $this->type,
-            'filter' => $this->filter,
+            'widgets' => $this->widgets,
             'seq' => $this->seq,
             'in_summary' => $this->in_summary,
             'category_id' => $this->category_id,

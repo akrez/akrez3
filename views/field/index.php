@@ -72,41 +72,26 @@ $models = array_merge([$newModel], $dataProvider->getModels());
             ],
         ]);
         ?>
-        <?php
-        if (!$model->isNewRecord) {
-            echo $form->field($model, 'filter')->widget(Select2::classname(), [
-                'data' => FieldList::getTypeFilter($model->type),
-                'hideSearch' => true,
-                'options' => [
-                    'placeholder' => $model->getAttributeLabel('filter'),
-                    'id' => Html::getInputId($model, 'filter') . '-' . $model->id,
-                    'dir' => 'rtl',
-                ],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ]);
-        }
-        ?>
     </div>
 
-    <?php if ($model->type == FieldList::TYPE_STRING) : ?>
-        <div class="row">
-            <?= $form->field($model, 'options', ['template' => '<div class="input-group">{label}{input}</div>{hint}{error}', 'options' => ['class' => 'col-sm-12 col-lg-9']])->textarea()->hint('گزینه‌ها را بوسیله ویرگول (,) یا خط جدید از هم جدا کنید.'); ?>
-        </div>
-    <?php elseif ($model->type == FieldList::TYPE_NUMBER) : ?>
-        <div class="row">
-            <?= $form->field($model, 'value_max')->textInput(['type' => 'number']); ?>
-        </div>
-        <div class="row">
-            <?= $form->field($model, 'options', ['template' => '<div class="input-group">{label}{input}</div>{hint}{error}', 'options' => ['class' => 'col-sm-12 col-lg-9']])->textarea()->hint('گزینه‌ها را بوسیله ویرگول (,) یا خط جدید از هم جدا کنید.'); ?>
-        </div>
-    <?php elseif ($model->type == FieldList::TYPE_BOOLEAN) : ?>
+    <?php if ($model->type == FieldList::TYPE_BOOLEAN) : ?>
         <div class="row">
             <?= $form->field($model, 'label_no')->textInput(); ?>
             <?= $form->field($model, 'label_yes')->textInput(); ?>
         </div>
     <?php endif; ?>
+
+    <div class="row">
+        <?php
+        if (!$model->isNewRecord) {
+            echo $form->field($model, 'widgets', [
+                'template' => '{label}{input}{hint}{error}',
+                'labelOptions' => ['class' => ''], 'options' => ['class' => 'col-sm-12 col-lg-9']
+            ])->checkboxList(FieldList::getTypeWidgets($model->type));
+        }
+        ?>
+    </div>
+
 
     <div class="row pb20">
         <div class="col-sm-4 col-lg-2">

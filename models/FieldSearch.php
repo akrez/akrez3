@@ -19,7 +19,7 @@ class FieldSearch extends Field
     {
         return [
             [['id', 'updated_at', 'seq', 'in_summary'], 'integer'],
-            [['title', 'type', 'filter'], 'safe'],
+            [['title', 'type'], 'safe'],
         ];
     }
 
@@ -80,8 +80,7 @@ class FieldSearch extends Field
         ]);
 
         $query->andFilterWhere(['like', 'title', $this->title])
-                ->andFilterWhere(['like', 'type', $this->type])
-                ->andFilterWhere(['like', 'filter', $this->filter]);
+                ->andFilterWhere(['like', 'type', $this->type]);
 
         return $dataProvider;
     }

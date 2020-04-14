@@ -38,6 +38,7 @@ class Model extends BaseModel
             'status' => 'وضعیت',
             'height' => 'طول',
             'widget' => 'نمایه',
+            'widgets' => 'فیلترها',
             'address' => 'آدرس',
             'package' => 'شرایط فروش',
             'user_id' => 'کاربر',

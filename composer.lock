@@ -1723,5 +1723,6 @@
     "platform": {
         "php": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }

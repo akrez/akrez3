@@ -26,77 +26,93 @@ class FieldList extends Model
         return (isset($list[$type]) ? $list[$type] : null);
     }
 
-    const FILTER_STRING = 'filter_string';
-    const FILTER_NUMBER = 'filter_number';
-    const FILTER_2STATE = 'filter_2state';
-    const FILTER_3STATE = 'filter_3state';
-    const FILTER_SINGLE = 'filter_single';
-    const FILTER_MULTI = 'filter_multi';
+    ////////////////////////////////////////////////////////
 
-    public static function filterList()
+    const OPERATION_BETWEEN = 'BETWEEN';
+
+    public static function typesOpertaionsList()
     {
         return [
             self::TYPE_STRING => [
-                self::FILTER_STRING => Yii::t('app', 'filter_string'),
-                self::FILTER_SINGLE => Yii::t('app', 'filter_single'),
-                self::FILTER_MULTI => Yii::t('app', 'filter_multi'),
-            ],
-            self::TYPE_NUMBER => [
-                self::FILTER_NUMBER => Yii::t('app', 'filter_number'),
-                self::FILTER_SINGLE => Yii::t('app', 'filter_single'),
-                self::FILTER_MULTI => Yii::t('app', 'filter_multi'),
-            ],
-            self::TYPE_BOOLEAN => [
-                self::FILTER_2STATE => Yii::t('app', 'filter_2state'),
-                self::FILTER_3STATE => Yii::t('app', 'filter_3state'),
-            ],
-        ];
-    }
-
-    public static function getTypeFilter($type)
-    {
-        $list = self::filterList();
-        return (isset($list[$type]) ? $list[$type] : []);
-    }
-
-    public static function opertaionList()
-    {
-        return [
-            self::FILTER_STRING => [
                 'LIKE' => Yii::t('app', 'LIKE'),
                 'NOT LIKE' => Yii::t('app', 'NOT LIKE'),
                 '=' => Yii::t('app', 'EQUAL'),
                 '<>' => Yii::t('app', 'NOT EQUAL'),
+                'IN' => Yii::t('app', 'IN'),
+                'NOT IN' => Yii::t('app', 'NOT IN'),
             ],
-            self::FILTER_NUMBER => [
-                '>' => Yii::t('app', 'BIGGER THAN'),
-                '<' => Yii::t('app', 'SMALLER THAN'),
+            self::TYPE_NUMBER => [
+                '>=' => Yii::t('app', 'BIGGER THAN'),
+                '<=' => Yii::t('app', 'SMALLER THAN'),
                 '=' => Yii::t('app', 'EQUAL'),
                 '<>' => Yii::t('app', 'NOT EQUAL'),
-            ],
-            self::FILTER_2STATE => [
-                '=' => Yii::t('app', 'BE'),
-                '<>' => Yii::t('app', 'NOT BE'),
-            ],
-            self::FILTER_3STATE => [
-                '=' => Yii::t('app', 'BE'),
-                '<>' => Yii::t('app', 'NOT BE'),
-            ],
-            self::FILTER_SINGLE => [
                 'IN' => Yii::t('app', 'IN'),
                 'NOT IN' => Yii::t('app', 'NOT IN'),
+                self::OPERATION_BETWEEN => Yii::t('app', 'BETWEEN'),
             ],
-            self::FILTER_MULTI => [
-                'IN' => Yii::t('app', 'IN'),
-                'NOT IN' => Yii::t('app', 'NOT IN'),
+            self::TYPE_BOOLEAN => [
+                '=' => Yii::t('app', 'BE'),
+                '<>' => Yii::t('app', 'NOT BE'),
             ],
         ];
     }
 
-    public static function getFilterOpertaion($type)
+    public static function getTypeOpertaions($type)
     {
-        $list = self::opertaionList();
+        $list = self::typesOpertaionsList();
         return (isset($list[$type]) ? $list[$type] : []);
+    }
+
+    ////////////////////////////////////////////////////////
+
+    const WIDGET_BETWEEN = 'BETWEEN';
+    const WIDGET_BIGGER = '>=';
+    const WIDGET_SMALLER = '<=';
+
+    public static function typesWidgetsList()
+    {
+        return [
+            self::TYPE_STRING => [
+                'LIKE' => Yii::t('app', 'widget_like'),
+                'COMBO' => Yii::t('app', 'widget_combo'),
+                'NOT LIKE' => Yii::t('app', 'widget_not_like'),
+                '=' => Yii::t('app', 'widget_equal'),
+                '<>' => Yii::t('app', 'widget_not_equal'),
+                'SINGLE' => Yii::t('app', 'widget_single'),
+                'MULTI' => Yii::t('app', 'widget_multi'),
+            ],
+            self::TYPE_NUMBER => [
+                self::WIDGET_BETWEEN => Yii::t('app', 'widget_between'),
+                'COMBO' => Yii::t('app', 'widget_combo'),
+                self::WIDGET_BIGGER => Yii::t('app', 'widget_bigger'),
+                self::WIDGET_SMALLER => Yii::t('app', 'widget_smaller'),
+                '=' => Yii::t('app', 'widget_equal'),
+                '<>' => Yii::t('app', 'widget_not_equal'),
+                'SINGLE' => Yii::t('app', 'widget_single'),
+                'MULTI' => Yii::t('app', 'widget_multi'),
+            ],
+            self::TYPE_BOOLEAN => [
+                '2STATE' => Yii::t('app', 'widget_2state'),
+                '3STATE' => Yii::t('app', 'widget_3state'),
+            ],
+        ];
+    }
+
+    public static function getTypeWidgets($type)
+    {
+        $list = self::typesWidgetsList();
+        return (isset($list[$type]) ? $list[$type] : []);
+    }
+
+    public static function getDefaultWidgetOfType($type)
+    {
+        $list = self::getTypeWidgets($type);
+        return key($list);
+    }
+
+    public static function getPluralOperations()
+    {
+        return ['IN', 'NOT IN', self::OPERATION_BETWEEN,];
     }
 
 }
