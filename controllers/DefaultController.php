@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use app\components\Jdf;
 use app\models\CategorySearch;
-use app\models\LogApi;
+use app\models\LogSearch;
 use app\models\ProductSearch;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -32,7 +32,7 @@ class DefaultController extends Controller
     {
         $blog = Yii::$app->blog->getIdentity();
         //
-        $dbChartData = LogApi::statSummary($blog->name, '1398-12-01');
+        $dbChartData = LogSearch::statSummary($blog->name, Jdf::jdate('Y-m-d', strtotime(-29 . " days")));
         $dbChartData = ArrayHelper::map($dbChartData, 'created_date', 'cnt', 'have_action_primary');
         //
         $chartData = [

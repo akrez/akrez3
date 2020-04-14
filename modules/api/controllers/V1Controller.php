@@ -2,6 +2,7 @@
 
 namespace app\modules\api\controllers;
 
+use app\components\Jdf;
 use app\components\SingleSort;
 use app\models\Basket;
 use app\models\Category;
@@ -13,20 +14,20 @@ use app\models\FieldNumber;
 use app\models\FieldString;
 use app\models\Gallery;
 use app\models\Invoice;
+use app\models\LogApi;
+use app\models\LogSearch;
 use app\models\Package;
 use app\models\Product;
 use app\models\Province;
+use app\models\Search;
 use app\models\Status;
 use Yii;
-use app\models\Search;
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use app\components\Jdf;
-use app\models\LogApi;
 
 class V1Controller extends Controller
 {
@@ -35,7 +36,26 @@ class V1Controller extends Controller
     private static $_categoriesList = false;
     private static $_customer = false;
 
-    public static function log($params = [])
+    public static function logSearch($params = [])
+    {
+        $blog = self::blog();
+        @LogSearch::log($params + [
+                    'category_id' => null,
+                    'ip' => (isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : Yii::$app->request->getUserIP()), //TODO
+                    'api_version' => \Yii::$app->controller->id,
+                    'blog_name' => $blog['name'],
+                    'created_date' => Jdf::jdate('Y-m-d'),
+                    'created_time' => \date('H:i:s'),
+                    'user_id' => \Yii::$app->user->getId(),
+                    'user_agent' => \Yii::$app->request->getUserAgent(),
+                    'params' => json_encode([
+                        'get' => \Yii::$app->request->get(),
+                        'post' => \Yii::$app->request->post(),
+                    ]),
+        ]);
+    }
+
+    public static function logApi($params = [])
     {
         $blog = self::blog();
         @LogApi::log($params + [
@@ -156,7 +176,7 @@ class V1Controller extends Controller
 
     public static function actionConstant()
     {
-        self::log();
+        self::logApi();
         return [
             'type' => FieldList::typeList(),
             'widget' => FieldList::typesWidgetsList(),
@@ -169,7 +189,7 @@ class V1Controller extends Controller
 
     public function actionSearch($categoryId = null)
     {
-        self::log(['action_primary' => $categoryId]);
+        self::logSearch(['category_id' => $categoryId]);
         $searchParams = Yii::$app->request->post('Search', []);
         $page = Yii::$app->request->post('page');
         $pageSize = Yii::$app->request->post('page_size');
@@ -365,7 +385,7 @@ class V1Controller extends Controller
 
     public function actionProduct($id)
     {
-        self::log(['action_primary' => $id]);
+        self::logApi(['action_primary' => $id]);
         $blog = self::blog();
         $categories = self::categories();
 
@@ -419,7 +439,7 @@ class V1Controller extends Controller
 
     public function actionSignin()
     {
-        self::log();
+        self::logApi();
         $signin = Customer::signin(Yii::$app->request->post());
         if ($signin == null) {
             throw new BadRequestHttpException();
@@ -432,7 +452,7 @@ class V1Controller extends Controller
 
     public function actionSignout()
     {
-        self::log();
+        self::logApi();
         $signout = Yii::$app->customerApi->getIdentity();
         if (!$signout) {
             throw new NotFoundHttpException();
@@ -446,7 +466,7 @@ class V1Controller extends Controller
 
     public function actionSignup()
     {
-        self::log();
+        self::logApi();
         $signup = Customer::signup(Yii::$app->request->post());
         if ($signup == null) {
             throw new BadRequestHttpException();
@@ -459,7 +479,7 @@ class V1Controller extends Controller
 
     public function actionResetPasswordRequest()
     {
-        self::log();
+        self::logApi();
         $resetPasswordRequest = Customer::resetPasswordRequest(Yii::$app->request->post());
         if ($resetPasswordRequest == null) {
             throw new BadRequestHttpException();
@@ -469,7 +489,7 @@ class V1Controller extends Controller
 
     public function actionResetPassword()
     {
-        self::log();
+        self::logApi();
         $resetPassword = Customer::resetPassword(Yii::$app->request->post());
         if ($resetPassword == null) {
             throw new BadRequestHttpException();
@@ -480,7 +500,7 @@ class V1Controller extends Controller
     /*
       public function actionProfile()
       {
-      self::log();
+      self::logApi();
       $profile = Yii::$app->customerApi->getIdentity();
       if (!$profile) {
       throw new NotFoundHttpException();
@@ -496,13 +516,13 @@ class V1Controller extends Controller
 
     public function actionInfo()
     {
-        self::log();
+        self::logApi();
         return [];
     }
 
     public static function actionBasket()
     {
-        self::log();
+        self::logApi();
         $customer = self::customer();
         $categories = self::categories();
         //
@@ -530,7 +550,7 @@ class V1Controller extends Controller
 
     public static function actionBasketAdd($package_id)
     {
-        self::log(['action_primary' => $package_id]);
+        self::logApi(['action_primary' => $package_id]);
         $blog = self::blog();
         $customer = self::customer();
         $categories = self::categories();
@@ -560,7 +580,7 @@ class V1Controller extends Controller
 
     public static function actionBasketRemove($package_id)
     {
-        self::log(['action_primary' => $package_id]);
+        self::logApi(['action_primary' => $package_id]);
         $customer = self::customer();
         //
         $status = false;
@@ -576,7 +596,7 @@ class V1Controller extends Controller
 
     public static function actionInvoiceAdd()
     {
-        self::log();
+        self::logApi();
         $blog = self::blog();
         $customer = self::customer();
         $categories = self::categories();
@@ -621,7 +641,7 @@ class V1Controller extends Controller
 
     public function actionInvoice()
     {
-        self::log();
+        self::logApi();
         $blog = self::blog();
         $customer = self::customer();
         $categories = self::categories();
@@ -658,7 +678,7 @@ class V1Controller extends Controller
 
     public static function actionInvoiceRemove($id)
     {
-        self::log(['action_primary' => $id]);
+        self::logApi(['action_primary' => $id]);
         $blog = self::blog();
         $customer = self::customer();
         $categories = self::categories();
@@ -679,7 +699,7 @@ class V1Controller extends Controller
 
     public function actionInvoiceView($id)
     {
-        self::log(['action_primary' => $id]);
+        self::logApi(['action_primary' => $id]);
         $blog = self::blog();
         $customer = self::customer();
         $categories = self::categories();
