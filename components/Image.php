@@ -2,15 +2,24 @@
 
 namespace app\components;
 
+use Exception;
+use Imagine\Image\Box;
+use Imagine\Image\Palette\RGB;
+use Imagine\Image\Point;
 use Yii;
 use yii\base\Component;
 use yii\imagine\Image as Imagine;
 
 class Image extends Component
 {
+
     public static $validTypes = [
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
+    ];
+    public static $validModes = [
+        0 => 'NONE',
+        1 => 'INBOUND',
     ];
     private $_info;
     private $_error;
@@ -25,7 +34,7 @@ class Image extends Component
         return $this->_error;
     }
 
-    public function save($srcFile, $des, $width = null, $height = null, $quality = null, $desIsAbsolute = true)
+    public function save($srcFile, $des, $width = null, $height = null, $quality = null, $desIsAbsolute = true, $mode = 0)
     {
         try {
             $this->setError(null);
@@ -55,18 +64,39 @@ class Image extends Component
             $width = (empty($width) || $width < 1 || $imageSize[0] * 3 < $width ? null : intval($width));
             $height = (empty($height) || $height < 1 || $imageSize[1] * 3 < $height ? null : intval($height));
             $quality = (empty($quality) || $quality < 1 || 100 < $quality ? 67 : intval($quality));
-
+            $mode = (empty($mode) || !in_array($mode, array_keys(Image::$validModes)) ? 0 : intval($mode));
 
             $image = Imagine::getImagine()->open($srcFile);
 
             if ($width && $height) {
-                $image = Imagine::resize($image, $width, $height, false, true);
+                
             } elseif ($width) {
-                $image = Imagine::resize($image, $width, null, true, true);
+                $height = ($width * $imageSize[1] ) / $imageSize[0];
             } elseif ($height) {
-                $image = Imagine::resize($image, null, $height, true, true);
+                $width = ($height * $imageSize[0] ) / $imageSize[1];
             } else {
-                $image = Imagine::resize($image, $imageSize[0], $imageSize[1], true, true);
+                $width = $imageSize[0];
+                $height = $imageSize[1];
+            }
+
+            if ($mode == 1) {
+                $image = Imagine::resize($image, $width, $height, true, true);
+                $box = new Box($width, $height);
+                //
+                if ($imageSize[0] / $width < $imageSize[1] / $height) {
+                    $scale = $height / $imageSize[1];
+                } else {
+                    $scale = $width / $imageSize[0];
+                }
+                $newWidth = intval($imageSize[0] * $scale);
+                $newHeight = intval($imageSize[1] * $scale);
+                //
+                $color = (new RGB())->color('000', 0);
+                $pasteTo = new Point(($width - $newWidth) / 2, ($height - $newHeight) / 2);
+                //
+                $image = Imagine::getImagine()->create($box, $color)->paste($image, $pasteTo);
+            } else {
+                $image = Imagine::resize($image, $width, $height, false, true);
             }
 
             if ($desIsAbsolute) {
@@ -91,7 +121,8 @@ class Image extends Component
                             'desFile' => $desFile,
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
+            
         }
 
         return $this->setError(-1);
@@ -119,9 +150,9 @@ class Image extends Component
         return self::getGalleryPath() . DIRECTORY_SEPARATOR . $type . DIRECTORY_SEPARATOR . $name;
     }
 
-    public static function getCacheImagePath($type, $whq, $name)
+    public static function getCacheImagePath($type, $whqm, $name)
     {
-        return self::getGalleryPath() . DIRECTORY_SEPARATOR . $type . '-' . $whq . '-' . $name;
+        return self::getGalleryPath() . DIRECTORY_SEPARATOR . $type . '-' . $whqm . '-' . $name;
     }
 
     public static function getGalleryPath()
@@ -137,4 +168,5 @@ class Image extends Component
         }
         return $path;
     }
+
 }

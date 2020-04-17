@@ -1,4 +1,5 @@
 <?php
+
 namespace app\models;
 
 use app\components\Image;
@@ -111,17 +112,17 @@ class Gallery extends ActiveRecord
         return parent::delete();
     }
 
-    public static function cache($type, $name, $whq)
+    public static function cache($type, $name, $whqm)
     {
         try {
-            $whq = explode('_', $whq) + [0, 0, 0];
-            $whq = array_map('intval', $whq);
+            $whqm = explode('_', $whqm) + [0, 0, 0, 0];
+            $whqm = array_map('intval', $whqm);
 
             if (!preg_match("/^[A-Za-z0-9.]+$/i", $name)) {
                 return null;
             }
 
-            $destination = Image::getCacheImagePath($type, implode('_', $whq), $name);
+            $destination = Image::getCacheImagePath($type, implode('_', $whqm), $name);
             if (file_exists($destination)) {
                 return $destination;
             }
@@ -132,7 +133,7 @@ class Gallery extends ActiveRecord
             }
 
             $handler = new Image();
-            if ($handler->save($source, $destination, $whq[0], $whq[1], $whq[2])) {
+            if ($handler->save($source, $destination, $whqm[0], $whqm[1], $whqm[2], true, $whqm[3])) {
                 return $destination;
             }
         } catch (\Exception $e) {
