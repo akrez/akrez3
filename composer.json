@@ -1,12 +1,13 @@
 {
     "require": {
-        "php": "*",
+        "php": "7.2.*",
         "yiisoft/yii2": "*",
         "yiisoft/yii2-bootstrap": "*",
         "yiisoft/yii2-swiftmailer": "*",
-		"yiisoft/yii2-jui": "*",
+        "yiisoft/yii2-jui": "*",
         "yiisoft/yii2-imagine": "*",
-        "kartik-v/yii2-widget-select2": "*"
+        "kartik-v/yii2-widget-select2": "*",
+        "kartik-v/yii2-slider": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "*",
@@ -14,8 +15,8 @@
         "symfony/browser-kit": "*"
     },
     "config": {
-		"disable-tls":true,
-		"secure-http":false,
+        "disable-tls": true,
+        "secure-http": false,
         "process-timeout": 1800,
         "fxp-asset": {
             "enabled": false
