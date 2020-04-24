@@ -31,7 +31,7 @@ class ProductController extends Controller
         $behaviors['access'] = [
             'rules' => [
                 [
-                    'actions' => ['index', 'update', 'remove'],
+                    'actions' => ['index', 'update', 'status', 'remove'],
                     'allow' => true,
                     'verbs' => ['POST', 'GET'],
                     'roles' => ['@'],
@@ -66,6 +66,16 @@ class ProductController extends Controller
             return $this->redirect(AdminHelper::url(['index', 'parent_id' => $parent_id]));
         }
         return $this->render('update', $this->wizard->index(Yii::$app->request->queryParams));
+    }
+
+    public function actionStatus($parent_id, $id, $status)
+    {
+        $this->wizard->findModel($id);
+        $this->wizard->findParentModel($parent_id);
+        $this->wizard->model->status = $status;
+        $this->wizard->model->save();
+        $redirectUrl = AdminHelper::url(['product/index', 'parent_id' => $parent_id]);
+        return $this->redirect($redirectUrl);
     }
 
     public function actionRemove($parent_id, $id)

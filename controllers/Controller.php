@@ -12,7 +12,8 @@ use yii\web\NotFoundHttpException;
 class Controller extends BaseController
 {
 
-    public $wizard = null;
+    /** @var app\components\WizardController */
+    public $wizard;
 
     public function behaviors()
     {

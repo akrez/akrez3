@@ -51,10 +51,12 @@ $this->render('_form', [
             [
                 'format' => 'raw',
                 'value' => function ($model, $key, $index, $grid) {
-                    return Html::a(' <span class="glyphicon glyphicon-trash"></span> ' . Yii::t('app', 'Remove'), Url::current([0 => 'category/remove', 'id' => $model->id]), [
-                                'class' => 'btn btn-danger btn-block btn-social',
-                                'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-                    ]);
+                    if ($model->status == Status::STATUS_ACTIVE) {
+                        return Html::a(' <span class="glyphicon glyphicon-ban-circle"></span> ' . Status::getLabel(Status::STATUS_DISABLE), Url::current([0 => 'category/status', 'id' => $model->id, 'status' => Status::STATUS_DISABLE]), ['class' => 'btn btn-warning btn-block btn-social']);
+                    } elseif ($model->status == Status::STATUS_DISABLE) {
+                        return Html::a(' <span class="glyphicon glyphicon-ok-circle"></span> ' . Status::getLabel(Status::STATUS_ACTIVE), Url::current([0 => 'category/status', 'id' => $model->id, 'status' => Status::STATUS_ACTIVE]), ['class' => 'btn btn-primary btn-block btn-social']);
+                    }
+                    return '';
                 },
             ],
             [

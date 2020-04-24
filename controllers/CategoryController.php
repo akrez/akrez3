@@ -27,7 +27,7 @@ class CategoryController extends Controller
         $behaviors['access'] = [
             'rules' => [
                 [
-                    'actions' => ['index', 'update', 'remove'],
+                    'actions' => ['index', 'update', 'status', 'remove'],
                     'allow' => true,
                     'verbs' => ['POST', 'GET'],
                     'roles' => ['@'],
@@ -58,6 +58,15 @@ class CategoryController extends Controller
             return $this->redirect(AdminHelper::url(['index']));
         }
         return $this->render('update', $this->wizard->index(Yii::$app->request->queryParams));
+    }
+
+    public function actionStatus($id, $status)
+    {
+        $this->wizard->findModel($id);
+        $this->wizard->model->status = $status;
+        $this->wizard->model->save();
+        $redirectUrl = AdminHelper::url(['category/index']);
+        return $this->redirect($redirectUrl);
     }
 
     public function actionRemove($id)

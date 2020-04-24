@@ -22,7 +22,7 @@ $this->title = ($this->title ? $this->title : Yii::$app->name);
         <?php $this->head() ?>
     </head>
 
-    <body class="hold-transition skin-blue-light sidebar-mini">
+    <body class="hold-transition skin-green-light sidebar-mini">
         <?php $this->beginBody() ?>
 
         <div class="wrapper">
