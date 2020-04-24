@@ -13,6 +13,11 @@ use yii\web\View;
 /* @var $dataProvider ActiveDataProvider */
 
 $this->title = Yii::t('app', 'Categories');
+$this->registerCss('
+    .table thead tr th {
+        min-height: 52px;
+    }
+');
 ?>
 
 <h1 class="pb20"><?= Html::encode($this->title) ?></h1>
@@ -28,6 +33,8 @@ $this->render('_form', [
     GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{items}{summary}<br>{pager}",
+        'tableOptions' => ['class' => 'table table-hover table-bordered table-striped'],
         'columns' => [
             'title',
             [

@@ -22,6 +22,7 @@ $this->render('_form', [
     GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'layout' => "{items}{summary}<br>{pager}",
         'columns' => [
             [
                 'attribute' => 'image',

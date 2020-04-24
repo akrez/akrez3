@@ -147,11 +147,17 @@ a.desc:before {
     background-position: 0 -34px;
 }
 
-div.grid-view table td {
+div.grid-view table th ,div.grid-view table td {
     vertical-align: middle;
 }
 
-table thead tr th, .white-background {
+table thead tr th {
+    background-color: #ffffff;
+    height: 52px;
+    vertical-align: middle;
+}
+
+.white-background {
     background-color: #f9f9f9;
 }
 
