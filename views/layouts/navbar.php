@@ -13,6 +13,9 @@ use yii\helpers\Html;
     <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
             <li class="dropdown messages-menu">
+                <?= Html::a('<span>' . Yii::t('app', 'GoToBlog') . '</span>', Yii::$app->params['urlToBlog'](Yii::$app->blog->name()), ['target' => '_blank']) ?>
+            </li>
+            <li class="dropdown messages-menu">
                 <?= Html::a('<span>' . Yii::t('app', 'Blogs') . '</span>', Url::toRoute(['site/blogs'])) ?>
             </li>
             <li class="dropdown messages-menu">
