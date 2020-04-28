@@ -4,26 +4,6 @@ namespace app\models;
 
 use app\components\Helper;
 
-/**
- * This is the model class for table "product".
- *
- * @property int $id
- * @property int $updated_at
- * @property int $created_at
- * @property string $status
- * @property string $title
- * @property double $price_min
- * @property double $price_max
- * @property string $image
- * @property int $category_id
- * @property string $blog_name
- *
- * @property Gallery[] $galleries
- * @property Package[] $packages
- * @property Category $category
- * @property Blog $blogName
- * @property ProductField[] $productFields
- */
 class Search extends Model
 {
 
@@ -31,25 +11,25 @@ class Search extends Model
     public $type;
     public $category_id;
     public $operation;
-    public $value;
     public $widget;
+    //
+    public $_value;
+    //
+    public $value;
+    public $values;
+    public $value_min;
+    public $value_max;
 
     public function rules()
     {
         return [
-            [['!field', '!type', 'operation', 'value', 'widget',], 'required'],
+            [['!field', '!type', 'operation', '_value', 'widget',], 'required'],
+            [['value', 'values', 'value_min', 'value_max'], 'safe'],
             [['operation'], 'in', 'range' => function() {
                     return array_keys(FieldList::getTypeOpertaions($this->type));
                 }],
             [['widget'], 'in', 'range' => function() {
                     return array_keys(FieldList::getTypeWidgets($this->type));
-                }],
-            [['value'], function ($attribute, $params, $validator) {
-                    if ($this->operation == FieldList::OPERATION_BETWEEN) {
-                        if (!isset($this->value [0]) || !isset($this->value [1])) {
-                            $this->addError($attribute, 'The value must contain 2 value');
-                        }
-                    }
                 }],
         ];
     }
@@ -63,22 +43,67 @@ class Search extends Model
         if (empty($this->widget)) {
             $this->widget = FieldList::getDefaultWidgetOfType($this->type);
         }
+        //
+        $this->_value = null;
         if (in_array($this->operation, FieldList::getPluralOperations())) {
-            $this->value = Helper::normalizeArray($this->value, true);
-            if ($this->type == FieldList::TYPE_NUMBER || $this->type == FieldList::TYPE_BOOLEAN) {
-                array_map('floatval', $this->value);
+            $this->value = null;
+            $this->values = $this->filterByType($this->values, $this->type, true);
+            $this->value_min = null;
+            $this->value_max = null;
+            $this->_value = $this->values;
+        } elseif (in_array($this->operation, FieldList::getMinMaxOperations())) {
+            $this->value = null;
+            $this->values = null;
+            if (strlen($this->value_min) > 0 && strlen($this->value_max) > 0) {
+                $this->value_min = $this->filterByType($this->value_min, $this->type);
+                $this->value_max = $this->filterByType($this->value_max, $this->type);
+                $this->_value = [0 => $this->value_min, 1 => $this->value_max,];
             } else {
-                array_map('strval', $this->value);
+                $this->value_min = null;
+                $this->value_max = null;
+                $this->_value = [];
             }
         } else {
-            if ($this->type == FieldList::TYPE_NUMBER || $this->type == FieldList::TYPE_BOOLEAN) {
-                floatval($this->value);
-            } else {
-                strval($this->value);
-            }
+            $this->value = $this->filterByType($this->value, $this->type);
+            $this->values = null;
+            $this->value_min = null;
+            $this->value_max = null;
+            $this->_value = $this->value;
         }
         //
         return true;
+    }
+
+    private function filterByType($value, $type, $isArray = false)
+    {
+        try {
+            if ($isArray) {
+                $value = (array) $value;
+                if (empty($isArray)) {
+                    return [];
+                }
+            } else {
+                if (!strlen($value) > 0) {
+                    return null;
+                }
+            }
+            if ($type == FieldList::TYPE_NUMBER || $type == FieldList::TYPE_BOOLEAN) {
+                if ($isArray) {
+                    array_map('floatval', $value);
+                    return $value;
+                }
+                return floatval($value);
+            } elseif ($type == FieldList::TYPE_STRING) {
+                if ($isArray) {
+                    array_map('strval', $value);
+                    return $value;
+                }
+                return strval($value);
+            }
+        } catch (Exception $ex) {
+            
+        }
+        return null;
     }
 
 }

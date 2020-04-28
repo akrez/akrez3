@@ -112,7 +112,12 @@ class FieldList extends Model
 
     public static function getPluralOperations()
     {
-        return ['IN', 'NOT IN', self::OPERATION_BETWEEN,];
+        return ['IN', 'NOT IN',];
+    }
+
+    public static function getMinMaxOperations()
+    {
+        return [self::OPERATION_BETWEEN,];
     }
 
 }

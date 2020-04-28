@@ -125,7 +125,6 @@ class V1Controller extends Controller
         $models = [
             'title' => new Field(['attributes' => ['id' => 'title', 'title' => Yii::t('app', 'Title'), 'type' => FieldList::TYPE_STRING, 'widgets' => [FieldList::getDefaultWidgetOfType(FieldList::TYPE_STRING)]]]),
             'price' => new Field(['attributes' => ['id' => 'price', 'title' => Yii::t('app', 'Price'), 'type' => FieldList::TYPE_NUMBER, 'widgets' => [$categoryId ? FieldList::getDefaultWidgetOfType(FieldList::TYPE_NUMBER) : FieldList::WIDGET_SMALLER], 'unit' => 'ریال']]),
-            'exist' => new Field(['attributes' => ['id' => 'exist', 'title' => Yii::t('app', 'Exist'), 'type' => FieldList::TYPE_BOOLEAN, 'widgets' => [FieldList::getDefaultWidgetOfType(FieldList::TYPE_BOOLEAN)]]]),
         ];
 
         if ($categoryId) {
@@ -252,43 +251,35 @@ class V1Controller extends Controller
                 if ($filter['category_id']) {
                     if ($filter['type'] == FieldList::TYPE_STRING) {
                         $fieldStringHasFilter = true;
-                        $fieldStringQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['value']], ['=', 'field_id', $filter['field']]]);
+                        $fieldStringQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['_value']], ['=', 'field_id', $filter['field']]]);
                     } elseif ($filter['type'] == FieldList::TYPE_NUMBER) {
                         $fieldNumberHasFilter = true;
                         if ($filter['operation'] == FieldList::OPERATION_BETWEEN) {
-                            $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['value'][0], $filter['value'][1],], ['=', 'field_id', $filter['field']]]);
+                            $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['_value'][0], $filter['_value'][1],], ['=', 'field_id', $filter['field']]]);
                         } else {
-                            $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['value']], ['=', 'field_id', $filter['field']]]);
+                            $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['_value']], ['=', 'field_id', $filter['field']]]);
                         }
                     } elseif ($filter['type'] == FieldList::TYPE_BOOLEAN) {
                         $fieldNumberHasFilter = true;
-                        $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['value']], ['=', 'field_id', $filter['field']]]);
+                        $FieldNumberQuery->andFilterWhere(['AND', [$filter['operation'], 'value', $filter['_value']], ['=', 'field_id', $filter['field']]]);
                     }
                 } elseif ($filter['field'] == 'title') {
-                    $query->andFilterWhere([$filter['operation'], $filter['field'], $filter['value']]);
+                    $query->andFilterWhere([$filter['operation'], $filter['field'], $filter['_value']]);
                 } elseif ($filter['field'] == 'price') {
                     if ($filter['operation'] == '<') {
-                        $query->andFilterWhere([$filter['operation'], 'price_min', $filter['value']]);
+                        $query->andFilterWhere([$filter['operation'], 'price_min', $filter['_value']]);
                     } elseif ($filter['operation'] == '>') {
-                        $query->andFilterWhere([$filter['operation'], 'price_max', $filter['value']]);
+                        $query->andFilterWhere([$filter['operation'], 'price_max', $filter['_value']]);
                     } elseif ($filter['operation'] == '=') {
-                        $query->andFilterWhere(['OR', [$filter['operation'], 'price_min', $filter['value']], [$filter['operation'], 'price_min', $filter['value']]]);
+                        $query->andFilterWhere(['OR', [$filter['operation'], 'price_min', $filter['_value']], [$filter['operation'], 'price_min', $filter['_value']]]);
                     } elseif ($filter['operation'] == '<>') {
-                        $query->andFilterWhere(['AND', [$filter['operation'], 'price_min', $filter['value']], [$filter['operation'], 'price_min', $filter['value']]]);
+                        $query->andFilterWhere(['AND', [$filter['operation'], 'price_min', $filter['_value']], [$filter['operation'], 'price_min', $filter['_value']]]);
                     } elseif ($filter['operation'] == 'IN') {
-                        $query->andFilterWhere(['OR', [$filter['operation'], 'price_min', $filter['value']], [$filter['operation'], 'price_min', $filter['value']]]);
+                        $query->andFilterWhere(['OR', [$filter['operation'], 'price_min', $filter['_value']], [$filter['operation'], 'price_min', $filter['_value']]]);
                     } elseif ($filter['operation'] == 'NOT IN') {
-                        $query->andFilterWhere(['AND', [$filter['operation'], 'price_min', $filter['value']], [$filter['operation'], 'price_min', $filter['value']]]);
+                        $query->andFilterWhere(['AND', [$filter['operation'], 'price_min', $filter['_value']], [$filter['operation'], 'price_min', $filter['_value']]]);
                     } elseif ($filter['operation'] == FieldList::OPERATION_BETWEEN) {
-                        $query->andFilterWhere(['AND', ['>=', 'price_min', $filter['value'][0]], ['<=', 'price_min', $filter['value'][1]]]);
-                    }
-                } elseif ($filter['field'] == 'exist') {
-                    if (($filter['operation'] == '=') == boolval($filter['value'])) {
-                        $query->andWhere(['not', ['price_min' => null]]);
-                        $query->andWhere(['not', ['price_max' => null]]);
-                    } else {
-                        $query->andWhere(['price_min' => null]);
-                        $query->andWhere(['price_max' => null]);
+                        $query->andFilterWhere(['AND', ['>=', 'price_min', $filter['_value'][0]], ['<=', 'price_min', $filter['_value'][1]]]);
                     }
                 }
             }
