@@ -20,7 +20,7 @@ use app\components\Helper;
  * @property string|null $action_primary
  * @property string|null $params
  */
-class LogApi extends ActiveRecord
+class LogApi extends LogActiveRecord
 {
 
     public static function log($params)

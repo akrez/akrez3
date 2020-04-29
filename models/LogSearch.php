@@ -19,8 +19,11 @@ use app\components\Helper;
  * @property string|null $category_id
  * @property string|null $params
  */
-class LogSearch extends ActiveRecord
+class LogSearch extends LogActiveRecord
 {
+
+    public $cnt;
+    public $has_category;
 
     public static function log($params)
     {
@@ -41,20 +44,16 @@ class LogSearch extends ActiveRecord
 
     public static function statSummary($blogName, $createdDateFrom)
     {
-        $tableName = self::tableName();
-        return Yii::$app->dbLog->createCommand("
-            SELECT
-                IF(`category_id` IS NULL, 0, 1) AS have_action_primary,
-                `created_date`,
-                COUNT(`id`) AS cnt
-            FROM
-                `$tableName`
-            WHERE
-                (`blog_name` = :blog_name) AND :created_date_from <= `created_date`
-            GROUP BY
-                have_action_primary,
-                `created_date`
-        ", [':blog_name' => $blogName, ':created_date_from' => $createdDateFrom])->queryAll();
+        return self::find()
+                        ->select(['IF(`category_id` IS NULL, 0, 1) AS has_category', 'created_date', 'COUNT(`id`) AS cnt',])
+                        ->where(['blog_name' => $blogName])
+                        ->andWhere(['>', 'created_date', $createdDateFrom])
+                        ->groupBy(['has_category', 'created_date',])->asArray()->all();
+    }
+
+    public static function statLastCountQuery($blogName)
+    {
+        return self::find()->where(['blog_name' => $blogName])->orderBy(['id' => SORT_DESC]);
     }
 
     public static function tableName()

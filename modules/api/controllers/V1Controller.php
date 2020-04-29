@@ -46,7 +46,7 @@ class V1Controller extends Controller
                     'blog_name' => $blog['name'],
                     'created_date' => Jdf::jdate('Y-m-d'),
                     'created_time' => \date('H:i:s'),
-                    'user_id' => \Yii::$app->user->getId(),
+                    'user_id' => \Yii::$app->customerApi->getId(),
                     'user_agent' => \Yii::$app->request->getUserAgent(),
                     'params' => json_encode([
                         'get' => \Yii::$app->request->get(),
@@ -65,7 +65,7 @@ class V1Controller extends Controller
                     'blog_name' => $blog['name'],
                     'created_date' => Jdf::jdate('Y-m-d'),
                     'created_time' => \date('H:i:s'),
-                    'user_id' => \Yii::$app->user->getId(),
+                    'user_id' => \Yii::$app->customerApi->getId(),
                     'user_agent' => \Yii::$app->request->getUserAgent(),
                     'action' => \Yii::$app->controller->action->id,
                     'params' => json_encode([

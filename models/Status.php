@@ -6,6 +6,7 @@ use Yii;
 
 class Status extends Model
 {
+
     const STATUS_UNVERIFIED = 0;
     const STATUS_ACTIVE = 1;
     const STATUS_DISABLE = 2;
@@ -62,6 +63,15 @@ class Status extends Model
             self::STATUS_ACTIVE => Yii::t('app', 'Active'),
             self::STATUS_DISABLE => Yii::t('app', 'Disable'),
             self::STATUS_DELETED => Yii::t('app', 'Deleted'),
+        ];
+    }
+
+    public static function getUnverified()
+    {
+        return [
+            self::STATUS_UNVERIFIED => Yii::t('app', 'Unverified'),
+            self::STATUS_ACTIVE => Yii::t('app', 'Active'),
+            self::STATUS_DISABLE => Yii::t('app', 'Disable'),
         ];
     }
 

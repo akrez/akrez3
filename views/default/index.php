@@ -2,6 +2,8 @@
 
 use app\assets\ChartJsAsset;
 use app\components\AdminHelper;
+use yii\data\ActiveDataProvider;
+use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\web\View;
 
@@ -32,13 +34,50 @@ $this->registerJs("", View::POS_LOAD);
         <canvas id="canvas" height="85"></canvas>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="table-responsive">
+            <?=
+            GridView::widget([
+                'dataProvider' => $chartSummaryDataProvider,
+                'columns' => [
+                    'id',
+                    'created_date',
+                    'created_time',
+                    [
+                        'attribute' => 'user_id',
+                        'value' => function ($model) use($list) {
+                            if (isset($list['customers'][$model->user_id])) {
+                                return $list['customers'][$model->user_id]->email;
+                            }
+                        }
+                    ],
+                    'user_agent',
+                    'ip',
+                    [
+                        'attribute' => 'category_id',
+                        'value' => function ($model) use($list) {
+                            if (isset($list['categories'][$model->category_id])) {
+                                return $list['categories'][$model->category_id]->title;
+                            }
+                        }
+                    ]
+                ],
+                'summary' => false,
+            ])
+            ?>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function (event) {
 
         var config = {
             type: 'line',
             data: {
-                labels: <?= json_encode($chartData['labels']) ?>,
+                labels: <?= json_encode($chartSummaryData['labels']) ?>,
                 datasets: [
                     {
                         label: 'بدون دسته بندی',
@@ -46,7 +85,7 @@ $this->registerJs("", View::POS_LOAD);
                         borderColor: '#ff6a8a',
                         backgroundColor: '#ffb1c1',
                         spanGaps: true,
-                        data: <?= json_encode($chartData['dontHaveActionPrimaryCount']) ?>,
+                        data: <?= json_encode($chartSummaryData['dontHaveCategoryId']) ?>,
                     },
                     {
                         label: 'با دسته بندی خاص',
@@ -54,7 +93,7 @@ $this->registerJs("", View::POS_LOAD);
                         borderColor: '#53afee',
                         backgroundColor: '#9ad0f5',
                         spanGaps: true,
-                        data: <?= json_encode($chartData['haveActionPrimaryCount']) ?>,
+                        data: <?= json_encode($chartSummaryData['haveCategoryId']) ?>,
                     },
                     {
                         label: 'مجموع',
@@ -62,7 +101,7 @@ $this->registerJs("", View::POS_LOAD);
                         borderColor: '#993799',
                         backgroundColor: 'rgba(209,165,209,0.25)',
                         spanGaps: true,
-                        data: <?= json_encode($chartData['sumCount']) ?>
+                        data: <?= json_encode($chartSummaryData['sum']) ?>
                     },
                 ]
             },
@@ -87,13 +126,15 @@ $this->registerJs("", View::POS_LOAD);
                 },
                 scales: {
                     yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    xAxes: [
+                        {
                             ticks: {
-                                beginAtZero: true,
-                                callback: function (value) {
-                                    if (value % 1 === 0) {
-                                        return value;
-                                    }
-                                }
+                                maxRotation: 90,
+                                minRotation: 90
                             }
                         }]
                 }
