@@ -508,7 +508,9 @@ class V1Controller extends Controller
     public function actionInfo()
     {
         self::logApi();
-        return [];
+        return [
+            '_categories' => self::categories(),
+        ];
     }
 
     public static function actionBasket()
