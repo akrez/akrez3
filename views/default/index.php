@@ -10,7 +10,11 @@ use yii\web\View;
 $this->title = Yii::$app->blog->getIdentity()->title;
 $model = Yii::$app->blog->getIdentity();
 ChartJsAsset::register($this);
-$this->registerJs("", View::POS_LOAD);
+$this->registerCss("
+    .direction-ltr {
+        direction: ltr;
+    }
+");
 ?>
 
 <div class="row">
@@ -35,12 +39,15 @@ $this->registerJs("", View::POS_LOAD);
     </div>
 </div>
 
+<br>
+
 <div class="row">
     <div class="col-sm-12">
         <div class="table-responsive">
             <?=
             GridView::widget([
                 'dataProvider' => $chartSummaryDataProvider,
+                'tableOptions' => ['class' => 'table table-bordered table-striped table-hover table-condensed'],
                 'columns' => [
                     'id',
                     'created_date',
@@ -53,7 +60,10 @@ $this->registerJs("", View::POS_LOAD);
                             }
                         }
                     ],
-                    'user_agent',
+                    [
+                        'attribute' => 'user_agent',
+                        'contentOptions' => ['class' => 'direction-ltr'],
+                    ],
                     'ip',
                     [
                         'attribute' => 'category_id',
@@ -126,10 +136,10 @@ $this->registerJs("", View::POS_LOAD);
                 },
                 scales: {
                     yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    }],
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }],
                     xAxes: [
                         {
                             ticks: {
