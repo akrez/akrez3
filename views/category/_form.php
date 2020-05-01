@@ -32,6 +32,12 @@ $form = ActiveForm::begin([
     </div>
 </div>
 
+<div class="row">
+    <div class="col-xs-12 col-sm-12">
+        <?= $form->field($model, 'des')->textInput() ?>
+    </div>
+</div>
+
 <div class="row pb20">
     <div class="col-xs-12 col-sm-2">
         <?php

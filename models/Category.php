@@ -25,6 +25,7 @@ class Category extends ActiveRecord
     public $garanties;
     public $price_min;
     public $price_max;
+    public $des;
 
     public static function tableName()
     {
@@ -36,6 +37,7 @@ class Category extends ActiveRecord
         return [
             [['status', 'title'], 'required'],
             [['title'], 'string', 'max' => 64],
+            [['des'], 'string'],
             [['garanties', 'price_min', 'price_max'], 'safe'],
             [['status'], 'in', 'range' => Status::getDefaultKeys()],
             [['!blog_name'], 'required'],
@@ -50,10 +52,12 @@ class Category extends ActiveRecord
             'garanties' => null,
             'price_min' => null,
             'price_max' => null,
+            'des' => null,
         ];
         $this->garanties = $arrayParams['garanties'];
         $this->price_min = $arrayParams['price_min'];
         $this->price_max = $arrayParams['price_max'];
+        $this->des = $arrayParams['des'];
     }
 
     public function beforeSave($insert)
@@ -67,6 +71,7 @@ class Category extends ActiveRecord
             'garanties' => $this->garanties,
             'price_min' => $this->price_min,
             'price_max' => $this->price_max,
+            'des' => $this->des,
         ];
         $this->params = Json::encode($this->params);
 
@@ -94,6 +99,7 @@ class Category extends ActiveRecord
             'garanties' => $this->garanties,
             'price_min' => $this->price_min,
             'price_max' => $this->price_max,
+            'des' => $this->des,
         ];
     }
 
