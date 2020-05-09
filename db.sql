@@ -51,9 +51,9 @@ CREATE TABLE IF NOT EXISTS `blog` (
   `status` varchar(12) NOT NULL,
   `title` varchar(63) DEFAULT NULL,
   `slug` varchar(127) DEFAULT NULL,
-  `des` varchar(1023) DEFAULT NULL,
   `logo` varchar(16) DEFAULT NULL,
   `user_id` int(11) NOT NULL,
+  `params` text,
   PRIMARY KEY (`name`),
   KEY `user_id` (`user_id`),
   KEY `logo` (`logo`)
