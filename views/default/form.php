@@ -56,6 +56,23 @@ if ($model->isNewRecord) {
     </div>
 
     <div class="row">
+        <?= $form->field($model, 'address', ['options' => ['class' => 'col-sm-12',]])->textInput() ?>
+    </div>
+
+    <div class="row">
+        <?= $form->field($model, 'email')->textInput() ?>
+        <?= $form->field($model, 'phone')->textInput() ?>
+        <?= $form->field($model, 'mobile')->textInput() ?>
+    </div>
+
+    <div class="row">
+        <?= $form->field($model, 'instagram', ['options' => ['class' => 'col-sm-3',]])->textInput() ?>
+        <?= $form->field($model, 'telegram', ['options' => ['class' => 'col-sm-3',]])->textInput() ?>
+        <?= $form->field($model, 'facebook', ['options' => ['class' => 'col-sm-3',]])->textInput() ?>
+        <?= $form->field($model, 'twitter', ['options' => ['class' => 'col-sm-3',]])->textInput() ?>
+    </div>
+
+    <div class="row">
         <div class="col-sm-2">
             <div class="form-group">
                 <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success btn-block' : 'btn btn-primary btn-block']) ?>

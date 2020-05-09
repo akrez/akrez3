@@ -446,7 +446,7 @@ class V1Controller extends Controller
         self::logApi();
         $signout = Yii::$app->customerApi->getIdentity();
         if (!$signout) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
         }
         $signout = $signout->signout();
         if ($signout == null) {
@@ -494,7 +494,7 @@ class V1Controller extends Controller
       self::logApi();
       $profile = Yii::$app->customerApi->getIdentity();
       if (!$profile) {
-      throw new NotFoundHttpException();
+      throw new NotFoundHttpException(Yii::t('yii', 'Page not found.'));
       }
       $profile = $profile->profile(Yii::$app->request->post());
       if ($profile == null) {

@@ -34,7 +34,7 @@ class DefaultController extends Controller
     {
         $blog = Yii::$app->blog->getIdentity();
         /////
-        $dbChartSummaryData = LogSearch::statSummary($blog->name, Jdf::jdate('Y-m-d', strtotime(-29 . " days")));
+        $dbChartSummaryData = LogSearch::statSummary($blog->name, Jdf::jdate('Y-m-d', strtotime(-30 . " days")));
         $dbChartSummaryData = ArrayHelper::map($dbChartSummaryData, 'created_date', 'cnt', 'has_category');
         //
         $chartSummaryData = [

@@ -20,6 +20,7 @@ class Image extends Component
     public static $validModes = [
         0 => 'NONE',
         1 => 'INBOUND',
+        2 => 'OUTBOUND',
     ];
     private $_info;
     private $_error;
@@ -78,7 +79,6 @@ class Image extends Component
                 $width = $imageSize[0];
                 $height = $imageSize[1];
             }
-
             if ($mode == 1) {
                 $image = Imagine::resize($image, $width, $height, true, true);
                 $box = new Box($width, $height);
@@ -95,6 +95,8 @@ class Image extends Component
                 $pasteTo = new Point(($width - $newWidth) / 2, ($height - $newHeight) / 2);
                 //
                 $image = Imagine::getImagine()->create($box, $color)->paste($image, $pasteTo);
+            } elseif ($mode == 2) {
+                $image = Imagine::thumbnail($image, $width, $height);
             } else {
                 $image = Imagine::resize($image, $width, $height, false, true);
             }

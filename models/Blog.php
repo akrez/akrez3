@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use yii\helpers\Json;
+
 /**
  * This is the model class for table "blog".
  *
@@ -26,6 +28,19 @@ namespace app\models;
 class Blog extends ActiveRecord
 {
 
+    public $des;
+    //
+    public $address;
+    //
+    public $email;
+    public $phone;
+    public $mobile;
+    //
+    public $instagram;
+    public $telegram;
+    public $facebook;
+    public $twitter;
+    //
     public $apiConstantId = '3ar8c9cfb05d8865d0ad9c02enffae40';
     public $image;
 
@@ -39,19 +54,72 @@ class Blog extends ActiveRecord
         $rules = [
             [['status'], 'integer'],
             [['name', 'status', 'title', '!user_id'], 'required'],
-            [['name'], 'string', 'max' => 31],
             [['title'], 'string', 'max' => 63],
             [['name'], 'match', 'pattern' => '/^[a-z]+$/', 'message' => 'فقط از حروف کوچک انگلیسی بدون فاصله استفاده کنید.'],
             [['slug'], 'string', 'max' => 127],
-            [['des'], 'string', 'max' => 1023],
             [['logo'], 'string', 'max' => 16],
             [['name'], 'unique'],
             [['status'], 'in', 'range' => Status::getDefaultKeys()],
+            //
+            [['email'], 'email'],
+            [['facebook', 'instagram'], 'match', 'pattern' => '/^[a-z\d.]{5,}$/i'],
+            [['telegram'], 'match', 'pattern' => '/^[a-z\d.]+$/i'],
+            [['phone', 'mobile'], 'match', 'pattern' => '/^[0-9+]+$/'],
+            [['twitter'], 'match', 'pattern' => '/^[A-Za-z0-9_]{1,15}$/'],
+            [['address', 'des'], 'string'],
         ];
-        if (!$this->isNewRecord) {
+        if ($this->isNewRecord) {
+            $rules[] = [['name'], 'string', 'max' => 31];
+        } else {
             $rules[] = [['!name'], 'string', 'max' => 31];
         }
         return $rules;
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $arrayParams = (array) Json::decode($this->params) + [
+            'address' => null,
+            'phone' => null,
+            'mobile' => null,
+            'email' => null,
+            'instagram' => null,
+            'telegram' => null,
+            'facebook' => null,
+            'twitter' => null,
+            'des' => null,
+        ];
+        $this->address = $arrayParams['address'];
+        $this->phone = $arrayParams['phone'];
+        $this->mobile = $arrayParams['mobile'];
+        $this->email = $arrayParams['email'];
+        $this->instagram = $arrayParams['instagram'];
+        $this->telegram = $arrayParams['telegram'];
+        $this->facebook = $arrayParams['facebook'];
+        $this->twitter = $arrayParams['twitter'];
+        $this->des = $arrayParams['des'];
+    }
+
+    public function beforeSave($insert)
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+        $this->params = [
+            'address' => $this->address,
+            'phone' => $this->phone,
+            'mobile' => $this->mobile,
+            'email' => $this->email,
+            'instagram' => $this->instagram,
+            'telegram' => $this->telegram,
+            'facebook' => $this->facebook,
+            'twitter' => $this->twitter,
+            'des' => $this->des,
+        ];
+        $this->params = Json::encode($this->params);
+        return true;
     }
 
     public function info()
@@ -64,6 +132,14 @@ class Blog extends ActiveRecord
             'des' => $this->des,
             'logo' => $this->logo,
             'constant_id' => $this->apiConstantId,
+            'email' => $this->email,
+            'facebook' => $this->facebook,
+            'phone' => $this->phone,
+            'mobile' => $this->mobile,
+            'instagram' => $this->instagram,
+            'telegram' => $this->telegram,
+            'address' => $this->address,
+            'twitter' => $this->twitter,
         ];
     }
 
