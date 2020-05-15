@@ -9,22 +9,18 @@ use yii\base\Component;
 class Email extends Component
 {
 
-    public static $from = null;
+    public const EMAIL_SUPPORT = 'support@akrezing.ir';
 
-    public static function getFrom()
+    private static function send($from, $to, $subject, $view, $params)
     {
-        if (self::$from === null) {
-            return ['akrezing@gmail.com' => APP_NAME];
+        if ($from === null) {
+            $from = [self::EMAIL_SUPPORT => APP_NAME];
         }
-        return self::$from;
-    }
 
-    private static function send($to, $subject, $view, $params)
-    {
         try {
             return Yii::$app->mailer
                             ->compose($view, $params)
-                            ->setFrom(self::getFrom())
+                            ->setFrom($from)
                             ->setTo($to)
                             ->setSubject($subject)
                             ->send();
@@ -37,7 +33,7 @@ class Email extends Component
     public static function resetPasswordRequest($user)
     {
         $title = Yii::t('app', 'ResetPasswordRequest');
-        return self::send($user->email, $title, 'resetPasswordRequest', [
+        return self::send(null, $user->email, $title, 'resetPasswordRequest', [
                     '_title' => $title,
                     'user' => $user,
         ]);
@@ -45,9 +41,8 @@ class Email extends Component
 
     public static function customerResetPasswordRequest($customer, $blog)
     {
-        self::$from = ['akrezing@gmail.com' => $blog->title];
         $title = Yii::t('app', 'ResetPasswordRequest');
-        return self::send($customer->email, $title, 'customerResetPasswordRequest', [
+        return self::send([self::EMAIL_SUPPORT => $blog->title], $customer->email, $title, 'customerResetPasswordRequest', [
                     '_title' => $title,
                     'customer' => $customer,
                     'blog' => $blog,
