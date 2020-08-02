@@ -63,7 +63,7 @@ class Blog extends ActiveRecord
             //
             [['email'], 'email'],
             [['facebook', 'instagram'], 'match', 'pattern' => '/^[a-z\d.]{5,}$/i'],
-            [['telegram'], 'match', 'pattern' => '/^[a-z\d.]+$/i'],
+            [['telegram'], 'match', 'pattern' => '/^[a-z_\d.]+$/i'],
             [['phone', 'mobile'], 'match', 'pattern' => '/^[0-9+]+$/'],
             [['twitter'], 'match', 'pattern' => '/^[A-Za-z0-9_]{1,15}$/'],
             [['address', 'des'], 'string'],
