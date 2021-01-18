@@ -49,16 +49,19 @@ $this->registerCss("
 ");
 ?>
 
-<div class="container-fluid">
-    <div class="row equal">
-        <?php foreach ($models as $model) : ?>
-            <a class="thumbnail col-xs-12 col-sm-4 col-md-3 col-lg-2" href="<?= Url::to(['default/index', '_blog' => $model->name]) ?>"> 
-                <?= Html::img(($model->logo ? AdminHelper::getImageUrl('logo', '400', $model->logo) : '@web/cdn/image/logo.png'), ['class' => 'img img-responsive',]); ?>
-                <h3>
-                    <?= Html::encode($model->title) ?>
-                </h3>
-            </a>
-        <?php endforeach ?>
-    </div>
+<div class="row equal">
+	<?php foreach ($models as $model) : ?>
+		<a class="thumbnail col-xs-12 col-sm-4 col-md-3 col-lg-2" href="<?= Url::to(['default/index', '_blog' => $model->name]) ?>"> 
+			<?= Html::img(($model->logo ? AdminHelper::getImageUrl('logo', '400', $model->logo) : '@web/cdn/image/logo.png'), ['class' => 'img img-responsive',]); ?>
+			<h3>
+				<?= Html::encode($model->title) ?>
+			</h3>
+		</a>
+	<?php endforeach ?>
+</div>
+<div class="row">
+	<div class="col-sm-2 pb20" style="padding-right: 0px;padding-left: 0px;">
+		<a type="button" class="btn btn-success btn-block" style="margin-top: 20px;" href="<?= Url::to(['site/create']) ?>"><?= Yii::t('app', 'Create {name}', ['name' => Yii::t('app', 'Blog')]) ?></a>
+	</div>
 </div>
 

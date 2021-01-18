@@ -4,7 +4,7 @@ namespace app\models;
 
 use app\components\Image;
 use Yii;
-use yii\helpers\Url;
+use Exception;
 
 /**
  * This is the model class for table "gallery".
@@ -136,7 +136,7 @@ class Gallery extends ActiveRecord
             if ($handler->save($source, $destination, $whqm[0], $whqm[1], $whqm[2], true, $whqm[3])) {
                 return $destination;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             
         }
 
