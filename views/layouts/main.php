@@ -3,12 +3,14 @@
 use yii\helpers\Html;
 use app\assets\AdminAsset;
 use app\widgets\Alert;
+use yii\widgets\Spaceless;
 
 AdminAsset::register($this);
 $this->title = ($this->title ? $this->title : Yii::$app->name);
 
 ?>
 <?php $this->beginPage() ?>
+<?php Spaceless::begin(); ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
 
@@ -69,4 +71,5 @@ $this->title = ($this->title ? $this->title : Yii::$app->name);
     </body>
 
 </html>
+<?php Spaceless::end(); ?>
 <?php $this->endPage() ?>
